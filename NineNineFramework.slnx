@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="NineNineFramework/Src/BaldiPlusNineNineFramework.csproj" />
+  <Project Path="NineNineFrameworkTool/Src/NineNineFrameworkTool.csproj" Id="4d1df719-bed0-4e28-9307-93288d3fd8c0" />
+</Solution>
