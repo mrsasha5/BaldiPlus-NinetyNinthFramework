@@ -22,7 +22,7 @@ namespace NineNineFrameworkTool.Forms
         private void OpenForm(Form form)
         {
             form.Show();
-            WindowState = FormWindowState.Minimized;
+            //WindowState = FormWindowState.Minimized;
         }
 
         private void OnFormClosing(object? sender, FormClosingEventArgs args)

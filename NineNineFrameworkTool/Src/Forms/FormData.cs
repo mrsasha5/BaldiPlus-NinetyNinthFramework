@@ -92,7 +92,7 @@ namespace NineNineFrameworkTool.Forms
         }
         public virtual void ApplyProperties(JsonAssetEditorForm form)
         {
-            Name = string.IsNullOrEmpty(form._assetNameTextBox.Text) ? null! : form._assetNameTextBox.Text;
+            Name = form._assetNameTextBox.Text.GetNullIfEmpty()!;
         }
 
         public static JsonAssetData InitAssetOfType(AssetType type, string path, ListViewItem uiItem, JsonLoadStatus status)
@@ -167,6 +167,16 @@ namespace NineNineFrameworkTool.Forms
                 return data;
             }
         }
+
+        public void DeleteJsonIfExists()
+        {
+            string jsonPath = Path.ReplaceExtensionPath("json");
+            if (File.Exists(jsonPath))
+            {
+                File.Delete(jsonPath);
+                LoadStatus = JsonLoadStatus.NotFound;
+            }
+        }
     }
 
     internal class TextureJsonAssetData : JsonAssetData
@@ -218,7 +228,7 @@ namespace NineNineFrameworkTool.Forms
         {
             base.ApplyProperties(form);
             // Texture properties
-            Format = Enum.Parse<TextureFormat>(form._formatComboBox.Text);
+            if (Enum.TryParse(form._formatComboBox.Text, out TextureFormat format)) Format = format;
             // Sprite properties
             if (float.TryParse(form._pixelsPerUnitTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out float result)) 
                 PixelsPerUnit = result;
@@ -337,7 +347,7 @@ namespace NineNineFrameworkTool.Forms
             if (float.TryParse(form._volumeTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out float volume))
                 VolumeMultiplier = volume;
             // Subtitle properties
-            SoundKey = form._soundKeyTextBox.Text;
+            SoundKey = form._soundKeyTextBox.Text.GetNullIfEmpty()!;
             Encrypted = form._encryptedCheckBox.Checked;
             if (float.TryParse(form._subtitleDurationTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out float subtitleDuration))
                 SubtitleDuration = subtitleDuration;
@@ -355,6 +365,7 @@ namespace NineNineFrameworkTool.Forms
             form._encryptedCheckBox.Checked = Encrypted;
             form._subtitleDurationTextBox.Text = SubtitleDuration.ToString(CultureInfo.InvariantCulture.NumberFormat);
             form._subtitleColorTextBox.Text = Color.GetAsStringNoPercents();
+            form._addToMemoryCheckBox.Checked = AddToMemory;
         }
 
         public class SubtitleTimedKey

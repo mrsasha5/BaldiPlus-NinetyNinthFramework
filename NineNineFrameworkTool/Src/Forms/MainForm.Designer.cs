@@ -43,6 +43,7 @@
             _additionsLabel = new Label();
             _otherToolsTitleLabel = new Label();
             _textEncryptorButton = new Button();
+            _colorConverterButton = new Button();
             _contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -158,11 +159,21 @@
             _textEncryptorButton.UseVisualStyleBackColor = true;
             _textEncryptorButton.Click += TextEncryptorButton_Click;
             // 
+            // _colorConverterButton
+            // 
+            _colorConverterButton.Location = new Point(279, 175);
+            _colorConverterButton.Name = "_colorConverterButton";
+            _colorConverterButton.Size = new Size(261, 46);
+            _colorConverterButton.TabIndex = 18;
+            _colorConverterButton.Text = "Open Color Converter";
+            _colorConverterButton.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(942, 493);
+            Controls.Add(_colorConverterButton);
             Controls.Add(_textEncryptorButton);
             Controls.Add(_otherToolsTitleLabel);
             Controls.Add(_additionsLabel);
@@ -197,5 +208,6 @@
         private Label _additionsLabel;
         private Label _otherToolsTitleLabel;
         private Button _textEncryptorButton;
+        private Button _colorConverterButton;
     }
 }

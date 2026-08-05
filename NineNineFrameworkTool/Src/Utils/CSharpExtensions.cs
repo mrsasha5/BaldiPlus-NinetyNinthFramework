@@ -6,5 +6,10 @@
         {
             return Path.Combine(Path.GetDirectoryName(path)!, Path.GetFileNameWithoutExtension(path) + $".{newExtension}");
         }
+
+        public static string? GetNullIfEmpty(this string value)
+        {
+            return value == string.Empty ? null : value;
+        }
     }
 }

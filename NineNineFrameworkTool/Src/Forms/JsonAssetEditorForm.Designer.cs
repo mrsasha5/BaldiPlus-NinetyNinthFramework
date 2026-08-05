@@ -62,9 +62,9 @@
             _texTitleLabel = new Label();
             _assetNameTextBox = new TextBox();
             _soundPanel = new Panel();
+            _soundPaletteButton = new Button();
             _soundTypeComboBox = new ComboBox();
             _addToMemoryCheckBox = new CheckBox();
-            _hasAnimationCheckBox = new CheckBox();
             _subtitleDurationTextBox = new TextBox();
             _subtitleColorTextBox = new TextBox();
             _volumeTextBox = new TextBox();
@@ -77,7 +77,7 @@
             _addFilesFromFolderButton = new Button();
             _noPropertiesPanel = new Panel();
             _colorDialog = new ColorDialog();
-            _soundPaletteButton = new Button();
+            _deleteSelectedJsonsButton = new Button();
             _textureSpritePanel.SuspendLayout();
             _soundPanel.SuspendLayout();
             _assetBasicInfoPanel.SuspendLayout();
@@ -168,7 +168,7 @@
             // _subtitleDurationLabel
             // 
             _subtitleDurationLabel.Font = new Font("Segoe UI", 12F);
-            _subtitleDurationLabel.Location = new Point(14, 259);
+            _subtitleDurationLabel.Location = new Point(14, 276);
             _subtitleDurationLabel.Name = "_subtitleDurationLabel";
             _subtitleDurationLabel.Size = new Size(190, 34);
             _subtitleDurationLabel.TabIndex = 24;
@@ -179,7 +179,7 @@
             // _subtitleColorLabel
             // 
             _subtitleColorLabel.Font = new Font("Segoe UI", 12F);
-            _subtitleColorLabel.Location = new Point(14, 304);
+            _subtitleColorLabel.Location = new Point(14, 321);
             _subtitleColorLabel.Name = "_subtitleColorLabel";
             _subtitleColorLabel.Size = new Size(190, 34);
             _subtitleColorLabel.TabIndex = 26;
@@ -266,7 +266,7 @@
             // 
             _addFilesFromBufferButton.Location = new Point(722, 539);
             _addFilesFromBufferButton.Name = "_addFilesFromBufferButton";
-            _addFilesFromBufferButton.Size = new Size(198, 42);
+            _addFilesFromBufferButton.Size = new Size(196, 42);
             _addFilesFromBufferButton.TabIndex = 22;
             _addFilesFromBufferButton.Text = "Add Files from Clipboard";
             _addFilesFromBufferButton.UseVisualStyleBackColor = true;
@@ -286,7 +286,7 @@
             _applyChangesButton.Enabled = false;
             _applyChangesButton.Location = new Point(12, 587);
             _applyChangesButton.Name = "_applyChangesButton";
-            _applyChangesButton.Size = new Size(532, 47);
+            _applyChangesButton.Size = new Size(532, 42);
             _applyChangesButton.TabIndex = 23;
             _applyChangesButton.Text = "Apply Changes";
             _applyChangesButton.UseVisualStyleBackColor = true;
@@ -375,7 +375,6 @@
             // 
             // _assetNameTextBox
             // 
-            _assetNameTextBox.Enabled = false;
             _assetNameTextBox.Font = new Font("Segoe UI", 12F);
             _assetNameTextBox.Location = new Point(210, 62);
             _assetNameTextBox.Name = "_assetNameTextBox";
@@ -389,7 +388,6 @@
             _soundPanel.Controls.Add(_soundPaletteButton);
             _soundPanel.Controls.Add(_soundTypeComboBox);
             _soundPanel.Controls.Add(_addToMemoryCheckBox);
-            _soundPanel.Controls.Add(_hasAnimationCheckBox);
             _soundPanel.Controls.Add(_subtitleDurationTextBox);
             _soundPanel.Controls.Add(_subtitleColorLabel);
             _soundPanel.Controls.Add(_subtitleColorTextBox);
@@ -408,6 +406,16 @@
             _soundPanel.TabIndex = 24;
             _soundPanel.Visible = false;
             // 
+            // _soundPaletteButton
+            // 
+            _soundPaletteButton.Location = new Point(395, 321);
+            _soundPaletteButton.Name = "_soundPaletteButton";
+            _soundPaletteButton.Size = new Size(121, 34);
+            _soundPaletteButton.TabIndex = 31;
+            _soundPaletteButton.Text = "Palette";
+            _soundPaletteButton.UseVisualStyleBackColor = true;
+            _soundPaletteButton.Click += SoundPaletteButton_Click;
+            // 
             // _soundTypeComboBox
             // 
             _soundTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -421,26 +429,17 @@
             // 
             // _addToMemoryCheckBox
             // 
-            _addToMemoryCheckBox.Location = new Point(377, 404);
+            _addToMemoryCheckBox.Location = new Point(377, 397);
             _addToMemoryCheckBox.Name = "_addToMemoryCheckBox";
             _addToMemoryCheckBox.Size = new Size(139, 30);
             _addToMemoryCheckBox.TabIndex = 29;
             _addToMemoryCheckBox.Text = "Add To Memory";
             _addToMemoryCheckBox.UseVisualStyleBackColor = true;
             // 
-            // _hasAnimationCheckBox
-            // 
-            _hasAnimationCheckBox.Location = new Point(377, 368);
-            _hasAnimationCheckBox.Name = "_hasAnimationCheckBox";
-            _hasAnimationCheckBox.Size = new Size(139, 30);
-            _hasAnimationCheckBox.TabIndex = 28;
-            _hasAnimationCheckBox.Text = "Has Animation";
-            _hasAnimationCheckBox.UseVisualStyleBackColor = true;
-            // 
             // _subtitleDurationTextBox
             // 
             _subtitleDurationTextBox.Font = new Font("Segoe UI", 12F);
-            _subtitleDurationTextBox.Location = new Point(210, 259);
+            _subtitleDurationTextBox.Location = new Point(210, 276);
             _subtitleDurationTextBox.Name = "_subtitleDurationTextBox";
             _subtitleDurationTextBox.Size = new Size(306, 34);
             _subtitleDurationTextBox.TabIndex = 27;
@@ -448,7 +447,7 @@
             // _subtitleColorTextBox
             // 
             _subtitleColorTextBox.Font = new Font("Segoe UI", 12F);
-            _subtitleColorTextBox.Location = new Point(210, 304);
+            _subtitleColorTextBox.Location = new Point(210, 321);
             _subtitleColorTextBox.Name = "_subtitleColorTextBox";
             _subtitleColorTextBox.Size = new Size(179, 34);
             _subtitleColorTextBox.TabIndex = 25;
@@ -465,7 +464,7 @@
             // 
             _additionalSoundKeysButton.Location = new Point(14, 219);
             _additionalSoundKeysButton.Name = "_additionalSoundKeysButton";
-            _additionalSoundKeysButton.Size = new Size(502, 29);
+            _additionalSoundKeysButton.Size = new Size(502, 49);
             _additionalSoundKeysButton.TabIndex = 19;
             _additionalSoundKeysButton.Text = "Manage Additional Sound Keys";
             _additionalSoundKeysButton.UseVisualStyleBackColor = true;
@@ -513,7 +512,6 @@
             // _assetTypeComboBox
             // 
             _assetTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            _assetTypeComboBox.Enabled = false;
             _assetTypeComboBox.Font = new Font("Segoe UI", 12F);
             _assetTypeComboBox.FormattingEnabled = true;
             _assetTypeComboBox.Items.AddRange(new object[] { "None", "Texture2D", "Sprite", "Spritesheet", "AudioClip", "SoundObject" });
@@ -540,15 +538,15 @@
             _noPropertiesPanel.Size = new Size(532, 443);
             _noPropertiesPanel.TabIndex = 31;
             // 
-            // _soundPaletteButton
+            // _deleteSelectedJsonsButton
             // 
-            _soundPaletteButton.Location = new Point(395, 304);
-            _soundPaletteButton.Name = "_soundPaletteButton";
-            _soundPaletteButton.Size = new Size(121, 34);
-            _soundPaletteButton.TabIndex = 31;
-            _soundPaletteButton.Text = "Palette";
-            _soundPaletteButton.UseVisualStyleBackColor = true;
-            _soundPaletteButton.Click += SoundPaletteButton_Click;
+            _deleteSelectedJsonsButton.Location = new Point(924, 587);
+            _deleteSelectedJsonsButton.Name = "_deleteSelectedJsonsButton";
+            _deleteSelectedJsonsButton.Size = new Size(198, 42);
+            _deleteSelectedJsonsButton.TabIndex = 32;
+            _deleteSelectedJsonsButton.Text = "Delete Selected Json Files";
+            _deleteSelectedJsonsButton.UseVisualStyleBackColor = true;
+            _deleteSelectedJsonsButton.Click += DeleteSelectedJsonsButton_Click;
             // 
             // JsonAssetEditorForm
             // 
@@ -556,6 +554,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1134, 721);
+            Controls.Add(_deleteSelectedJsonsButton);
             Controls.Add(_addFilesFromFolderButton);
             Controls.Add(_assetBasicInfoPanel);
             Controls.Add(_viewingFileLabel);
@@ -573,6 +572,7 @@
             Controls.Add(_noPropertiesPanel);
             DoubleBuffered = true;
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "JsonAssetEditorForm";
             StartPosition = FormStartPosition.CenterScreen;
@@ -630,12 +630,12 @@
         internal TextBox _subtitleDurationTextBox;
         internal Label _subtitleColorLabel;
         internal CheckBox _addToMemoryCheckBox;
-        internal CheckBox _hasAnimationCheckBox;
         internal ComboBox _soundTypeComboBox;
         internal Button _addFilesFromFolderButton;
         private Panel _noPropertiesPanel;
         private ColumnHeader _assetTypeHeader;
         private Button _soundPaletteButton;
         private ColorDialog _colorDialog;
+        private Button _deleteSelectedJsonsButton;
     }
 }

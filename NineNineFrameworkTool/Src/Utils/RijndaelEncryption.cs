@@ -50,12 +50,12 @@ namespace NineNineFrameworkTool.Utils
 
             InitCipher(deriveBytes.GetBytes(BufferKeySize), iv, encryption: true);
 
-            byte[] cipherTextBuf = new byte[_cipher.GetOutputSize(value.Length)];
-            int length = _cipher.ProcessBytes(value, 0, value.Length, cipherTextBuf, 0);
-            length += _cipher.DoFinal(cipherTextBuf, length);
+            byte[] textBuffer = new byte[_cipher.GetOutputSize(value.Length)];
+            int length = _cipher.ProcessBytes(value, 0, value.Length, textBuffer, 0);
+            length += _cipher.DoFinal(textBuffer, length);
 
             byte[] dest = new byte[length];
-            Array.Copy(cipherTextBuf, 0, dest, 0, length);
+            Array.Copy(textBuffer, 0, dest, 0, length);
 
             List<byte> result = new List<byte>(salt);
             result.AddRange(iv);

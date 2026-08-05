@@ -1,7 +1,6 @@
 ﻿using NineNineFrameworkTool.Unity;
 using NineNineFrameworkTool.Utils;
 using System.Collections.Specialized;
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
@@ -54,6 +53,7 @@ namespace NineNineFrameworkTool.Forms
             {
                 _formatComboBox.Items.Add(format.ToString());
             }
+            _formatComboBox.Text = TextureFormat.RGBA32.ToString();
             CleanBaseProperties();
         }
 
@@ -68,19 +68,7 @@ namespace NineNineFrameworkTool.Forms
 
                 using (FileStream stream = new FileStream(data.Path.ReplaceExtensionPath("json"), FileMode.Create))
                 {
-                    switch (data.AssetType)
-                    {
-                        case AssetType.Texture2D:
-                            JsonSerializer.Serialize(stream, (TextureJsonAssetData)data, s_jsonSerializerOptions);
-                            break;
-                        case AssetType.Sprite:
-                            JsonSerializer.Serialize(stream, (TextureJsonAssetData)data, s_jsonSerializerOptions);
-                            break;
-                        case AssetType.SoundObject:
-                            JsonSerializer.Serialize(stream, (SoundObjectJsonAssetData)data, s_jsonSerializerOptions);
-                            break;
-                    }
-
+                    JsonSerializer.Serialize(stream, data, data.GetType(), s_jsonSerializerOptions);
                     stream.Flush();
                     counter++;
                     _progressBar.Invoke(delegate ()
@@ -99,6 +87,7 @@ namespace NineNineFrameworkTool.Forms
             {
                 _progressBar.Value = 0;
                 EnableFileManagement(true);
+                EnableProperties(true);
                 UpdateProperties();
                 _startButton.Enabled = true;
             });
@@ -171,6 +160,18 @@ namespace NineNineFrameworkTool.Forms
             }
         }
 
+        private void DeleteSelectedJsonsButton_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < _fileListView.Items.Count; i++)
+            {
+                if (_fileListView.Items[i].Selected)
+                {
+                    _loadedFiles[_fileListView.Items[i]].DeleteJsonIfExists();
+                    _loadedFiles[_fileListView.Items[i]].UpdateUI();
+                }
+            }
+        }
+
         private void RemoveSelectedButton_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < _fileListView.Items.Count; i++)
@@ -214,12 +215,7 @@ namespace NineNineFrameworkTool.Forms
             }
 
             UpdateProperties();
-
-            if (_loadedFiles.Count != _selectedItems.Count)
-            {
-                _selectAllButton.Text = "Select All";
-            }
-            else _selectAllButton.Text = "Unselect All";
+            UpdateSelectButton();
         }
 
         private void ApplyChangesButton_Click(object sender, EventArgs e)
@@ -257,7 +253,7 @@ namespace NineNineFrameworkTool.Forms
                 }
                 else
                 {
-                    EnableBaseProperties(true);
+                    EnableProperties(true);
                     LoadProperties(data);
 
                     string fileName = Path.GetFileName(data.Path);
@@ -274,7 +270,7 @@ namespace NineNineFrameworkTool.Forms
             {
                 _applyChangesButton.Enabled = false;
                 _textureSpritePanel.Visible = _soundPanel.Visible = false;
-                EnableBaseProperties(false);
+                EnableProperties(false);
                 CleanBaseProperties();
 
                 _viewingFileLabel.Text = "You are viewing: no file(s) selected.";
@@ -299,7 +295,7 @@ namespace NineNineFrameworkTool.Forms
                     }
                 }
 
-                EnableBaseProperties(true);
+                EnableProperties(true);
 
                 if (same)
                 {
@@ -316,6 +312,15 @@ namespace NineNineFrameworkTool.Forms
             }
         }
 
+        private void UpdateSelectButton()
+        {
+            if ((_loadedFiles.Count == 0 && _selectedItems.Count == 0) || _loadedFiles.Count != _selectedItems.Count)
+            {
+                _selectAllButton.Text = "Select All";
+            }
+            else _selectAllButton.Text = "Unselect All";
+        }
+
         private AssetType GetAssetType()
         {
             if (Enum.TryParse(_assetTypeComboBox.Text, out AssetType type))
@@ -330,7 +335,6 @@ namespace NineNineFrameworkTool.Forms
 
         private void LoadProperties(JsonAssetData data)
         {
-            EnableProperties(true);
             data.LoadProperties(this);
         }
 
@@ -341,6 +345,8 @@ namespace NineNineFrameworkTool.Forms
             _selectAllButton.Enabled = value;
             _removeSelectedButton.Enabled = value;
             _fileListView.Enabled = value;
+            _startButton.Enabled = value;
+
         }
 
         private void CleanBaseProperties()
@@ -349,51 +355,11 @@ namespace NineNineFrameworkTool.Forms
             _assetNameTextBox.Text = string.Empty;
         }
 
-        private void EnableBaseProperties(bool value)
-        {
-            _assetNameTextBox.Enabled = value;
-            _assetTypeComboBox.Enabled = value;
-        }
-
         private void EnableProperties(bool value)
         {
+            _assetBasicInfoPanel.Enabled = value;
             _textureSpritePanel.Enabled = value;
             _soundPanel.Enabled = value;
-        }
-
-        private void EnableSpriteProperties(bool value)
-        {
-            _pixelsPerUnitTextBox.Enabled = value;
-            _centerTextBox.Enabled = value;
-        }
-
-        private void CleanProperties()
-        {
-            // General data
-            _assetTypeComboBox.Text = string.Empty;
-            _assetNameTextBox.Text = string.Empty;
-
-            if (_textureSpritePanel.Visible)
-            {
-                // Texture2D
-                _formatComboBox.Text = string.Empty;
-
-                // Sprite
-                _pixelsPerUnitTextBox.Text = string.Empty;
-                _centerTextBox.Text = string.Empty;
-            }
-            else if (_soundPanel.Visible)
-            {
-                // Sound Object
-                _soundTypeComboBox.Text = string.Empty;
-                _soundKeyTextBox.Text = string.Empty;
-                _encryptedCheckBox.Checked = false;
-                _volumeTextBox.Text = string.Empty;
-                _subtitleDurationTextBox.Text = string.Empty;
-                _subtitleColorTextBox.Text = string.Empty;
-                _hasAnimationCheckBox.Checked = false;
-                _addToMemoryCheckBox.Checked = false;
-            }
         }
 
         private void SoundPaletteButton_Click(object sender, EventArgs e)

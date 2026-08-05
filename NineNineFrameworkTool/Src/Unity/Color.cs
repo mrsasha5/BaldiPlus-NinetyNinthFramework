@@ -1,21 +1,24 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace NineNineFrameworkTool.Unity
 {
     internal struct Color
     {
+        private float _r, _g, _b, _a;
+
         [JsonPropertyName("r")]
-        public float R { get; set; }
+        public float R { get { return _r; } set { _r = float.Clamp(value, 0f, 1f); } }
 
         [JsonPropertyName("g")]
-        public float G { get; set; }
+        public float G { get { return _g; } set { _g = float.Clamp(value, 0f, 1f); } }
 
         [JsonPropertyName("b")]
-        public float B { get; set; }
+        public float B { get { return _b; } set { _b = float.Clamp(value, 0f, 1f); } }
 
         [JsonPropertyName("a")]
-        public float A { get; set; }
+        public float A { get { return _a; } set { _a = float.Clamp(value, 0f, 1f); } }
 
         public static Color GetFromSystemColor(System.Drawing.Color color)
         {
@@ -24,21 +27,27 @@ namespace NineNineFrameworkTool.Unity
 
         public static Color? GetFromStringNoPercents(string value)
         {
+            if (string.IsNullOrEmpty(value)) return null;
+
             string[] values = value.Split(" ");
 
             if (values.Length >= 3)
             {
-                int r = int.Parse(values[0]);
-                int g = int.Parse(values[1]);
-                int b = int.Parse(values[2]);
-                int a = 1;
+                try
+                {
+                    int r = int.Parse(values[0]);
+                    int g = int.Parse(values[1]);
+                    int b = int.Parse(values[2]);
+                    int a = 255;
 
-                if (values.Length >= 4) a = int.Parse(values[3]);
+                    if (values.Length >= 4) a = int.Parse(values[3]);
 
-                return new Color(r, g, b, a);
+                    return new Color(r / 255f, g / 255f, b / 255f, a / 255f);
+                }
+                catch { return null; }
             }
 
-            return null!;
+            return null;
         }
 
         public System.Drawing.Color GetAsSystemColor()

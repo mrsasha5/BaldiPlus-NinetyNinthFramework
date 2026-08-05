@@ -16,7 +16,7 @@ namespace BaldiPlusNineNineFramework
     public class NineNineCore : BaseUnityPlugin
     {
         public const string GUID = "mrsasha5.baldiplus.ninetyninthframework";
-        public const string NAME = "Ninety Ninth Framework";
+        public const string NAME = "Ninety-Ninth Framework";
         public const string VERSION = "0.1.0.0";
 
         private const string CACHE_FOLDER = "Cache";
