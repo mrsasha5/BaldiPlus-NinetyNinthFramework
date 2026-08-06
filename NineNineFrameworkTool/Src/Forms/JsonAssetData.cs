@@ -107,7 +107,9 @@ namespace NineNineFrameworkTool.Forms
                     return null!; // new TextureJsonAssetData() { AssetType = AssetType.Sprite, Path = path, UIItem = uiItem, LoadStatus = status };
                 case AssetType.SoundObject:
                     return new SoundObjectJsonAssetData() { AssetType = AssetType.SoundObject, Path = path, UIItem = uiItem, LoadStatus = status };
-                default: // AudioClip since no any other parameters
+                case AssetType.AudioClip:
+                    return new JsonAssetData() { AssetType = type, Path = path, UIItem = uiItem, LoadStatus = status };
+                default:
                     return new JsonAssetData() { AssetType = type, Path = path, UIItem = uiItem, LoadStatus = status };
             }
         }
@@ -140,9 +142,13 @@ namespace NineNineFrameworkTool.Forms
                 T data = null!;
                 using (FileStream stream = new FileStream(jsonPath, FileMode.Open))
                 {
-                    data = JsonSerializer.Deserialize<T>(stream)!;
-                    data.Path = path;
-                    data.LoadStatus = JsonLoadStatus.Successful;
+                    try
+                    {
+                        data = JsonSerializer.Deserialize<T>(stream)!;
+                        data.Path = path;
+                        data.LoadStatus = JsonLoadStatus.Successful;
+                    }
+                    catch { }
                 }
 
                 if (data == null)
@@ -232,7 +238,7 @@ namespace NineNineFrameworkTool.Forms
             // Sprite properties
             if (float.TryParse(form._pixelsPerUnitTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out float result)) 
                 PixelsPerUnit = result;
-            Vector2? center = Vector2.GetFromString(form._centerTextBox.Text.Replace(',', '.'))!;
+            Vector2? center = Vector2.GetFromString(form._centerTextBox.Text.Replace(',', '.'));
             if (center != null!) Center = center.Value;
         }
 
@@ -244,16 +250,28 @@ namespace NineNineFrameworkTool.Forms
 
             if (AssetType == AssetType.Sprite)
             {
+                form._sprTitleLabel.Enabled = form._pixelsPerUnitLabel.Enabled = form._centerLabel.Enabled = true;
                 form._pixelsPerUnitTextBox.Enabled = form._centerTextBox.Enabled = true;
                 form._pixelsPerUnitTextBox.Text = PixelsPerUnit.ToString(CultureInfo.InvariantCulture.NumberFormat);
                 form._centerTextBox.Text = Center.GetAsString();
             }
             else
             {
+                form._sprTitleLabel.Enabled = form._pixelsPerUnitLabel.Enabled = form._centerLabel.Enabled = false;
                 form._pixelsPerUnitTextBox.Enabled = form._centerTextBox.Enabled = false;
                 form._pixelsPerUnitTextBox.Clear();
                 form._centerTextBox.Clear();
             }
+        }
+    }
+
+    internal class SpriteSheetJsonAssetData : JsonAssetData
+    {
+        public const string LastVersion = "1.0.0.0";
+
+        public SpriteSheetJsonAssetData()
+        {
+            Version = new Version(LastVersion);
         }
     }
 
@@ -385,6 +403,16 @@ namespace NineNineFrameworkTool.Forms
             Voice,
             Effect,
             Music
+        }
+    }
+
+    internal class AudioClipJsonAssetData : JsonAssetData
+    {
+        public const string LastVersion = "1.0.0.0";
+
+        public AudioClipJsonAssetData()
+        {
+            Version = new Version(LastVersion);
         }
     }
 }

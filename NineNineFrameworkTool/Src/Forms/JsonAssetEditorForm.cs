@@ -170,6 +170,7 @@ namespace NineNineFrameworkTool.Forms
                     _loadedFiles[_fileListView.Items[i]].UpdateUI();
                 }
             }
+            UpdateProperties();
         }
 
         private void RemoveSelectedButton_Click(object sender, EventArgs e)
@@ -257,10 +258,10 @@ namespace NineNineFrameworkTool.Forms
                     LoadProperties(data);
 
                     string fileName = Path.GetFileName(data.Path);
-                    /*if (fileName.Length >= 22)
+                    if (fileName.Length >= 40)
                     {
-                        fileName = $"{fileName.Substring(0, 19)}...";
-                    }*/
+                        fileName = $"{fileName.Substring(0, 37)}...";
+                    }
                     _viewingFileLabel.Text = $"You are viewing: {fileName}";
 
                     _applyChangesButton.Enabled = true;

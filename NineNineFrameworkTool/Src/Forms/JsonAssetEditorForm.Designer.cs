@@ -40,6 +40,9 @@
             _volumeMultiplierLabel = new Label();
             _subtitleDurationLabel = new Label();
             _subtitleColorLabel = new Label();
+            _addToMemoryCheckBox = new CheckBox();
+            _additionalSoundKeysButton = new Button();
+            _encryptedCheckBox = new CheckBox();
             _progressBar = new ProgressBar();
             _startButton = new Button();
             _fileListView = new ListView();
@@ -64,12 +67,9 @@
             _soundPanel = new Panel();
             _soundPaletteButton = new Button();
             _soundTypeComboBox = new ComboBox();
-            _addToMemoryCheckBox = new CheckBox();
             _subtitleDurationTextBox = new TextBox();
             _subtitleColorTextBox = new TextBox();
             _volumeTextBox = new TextBox();
-            _additionalSoundKeysButton = new Button();
-            _encryptedCheckBox = new CheckBox();
             _soundKeyTextBox = new TextBox();
             _soundObjectTitleLabel = new Label();
             _assetBasicInfoPanel = new Panel();
@@ -97,7 +97,7 @@
             _centerLabel.TabIndex = 22;
             _centerLabel.Text = "Center:";
             _centerLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_centerLabel, "2D vector which controls a center of the sprite.\r\nEach value must be in the range [0.0; 1.0].\r\nThese values are percents of the sprite.\r\n1% = 0.01.");
+            _toolTipStandard.SetToolTip(_centerLabel, "A 2D vector that controls the sprite's center.\r\nEach value must be in the range [0.0, 1.0],\r\nrepresenting normalized coordinates.");
             // 
             // _assetNameLabel
             // 
@@ -108,7 +108,7 @@
             _assetNameLabel.TabIndex = 19;
             _assetNameLabel.Text = "Name:";
             _assetNameLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_assetNameLabel, resources.GetString("_assetNameLabel.ToolTip"));
+            _toolTipStandard.SetToolTip(_assetNameLabel, "Overrides the default asset name to prevent it from using the file name.");
             // 
             // _formatLabel
             // 
@@ -119,7 +119,7 @@
             _formatLabel.TabIndex = 15;
             _formatLabel.Text = "Format:";
             _formatLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_formatLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_formatLabel, "Defines compression and other rendering parameters for the Unity engine.");
             // 
             // _assetTypeLabel
             // 
@@ -130,7 +130,7 @@
             _assetTypeLabel.TabIndex = 16;
             _assetTypeLabel.Text = "Asset type:";
             _assetTypeLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_assetTypeLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_assetTypeLabel, "Defines the asset type on which other properties depend.");
             // 
             // _soundKeyLabel
             // 
@@ -141,7 +141,7 @@
             _soundKeyLabel.TabIndex = 16;
             _soundKeyLabel.Text = "Sound Key:";
             _soundKeyLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_soundKeyLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_soundKeyLabel, "Specifies the localization key to get text data from the first subtitle.");
             // 
             // _soundTypeLabel
             // 
@@ -152,7 +152,7 @@
             _soundTypeLabel.TabIndex = 20;
             _soundTypeLabel.Text = "Sound Type:";
             _soundTypeLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_soundTypeLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_soundTypeLabel, "This parameter defines how the game balances the SoundObject's volume.\r\nUsers can reduce or increase the volume of a sound using the Options menu.");
             // 
             // _volumeMultiplierLabel
             // 
@@ -163,7 +163,7 @@
             _volumeMultiplierLabel.TabIndex = 22;
             _volumeMultiplierLabel.Text = "Volume Multiplier:";
             _volumeMultiplierLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_volumeMultiplierLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_volumeMultiplierLabel, resources.GetString("_volumeMultiplierLabel.ToolTip"));
             // 
             // _subtitleDurationLabel
             // 
@@ -174,7 +174,7 @@
             _subtitleDurationLabel.TabIndex = 24;
             _subtitleDurationLabel.Text = "Subtitle Duration:";
             _subtitleDurationLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_subtitleDurationLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_subtitleDurationLabel, "Defines how long the subtitles will be shown in the game.\r\nThe value is specified in seconds.");
             // 
             // _subtitleColorLabel
             // 
@@ -185,7 +185,38 @@
             _subtitleColorLabel.TabIndex = 26;
             _subtitleColorLabel.Text = "Subtitle Color:";
             _subtitleColorLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_subtitleColorLabel, "Determines compression and other rendering parameters.\r\nRecommended value from MTM101's API is RGBA32.");
+            _toolTipStandard.SetToolTip(_subtitleColorLabel, "Defines the color of the subtitles in the RGBA format.\r\n");
+            // 
+            // _addToMemoryCheckBox
+            // 
+            _addToMemoryCheckBox.Location = new Point(377, 397);
+            _addToMemoryCheckBox.Name = "_addToMemoryCheckBox";
+            _addToMemoryCheckBox.Size = new Size(139, 30);
+            _addToMemoryCheckBox.TabIndex = 29;
+            _addToMemoryCheckBox.Text = "Add To Memory";
+            _toolTipStandard.SetToolTip(_addToMemoryCheckBox, "Allows the game to keep the SoundObject in a limited memory pool.\r\nIf a MusicManager instance has midiCorrupted set to true,\r\nthere is a chance that the SoundObject might be played randomly.");
+            _addToMemoryCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // _additionalSoundKeysButton
+            // 
+            _additionalSoundKeysButton.Location = new Point(14, 219);
+            _additionalSoundKeysButton.Name = "_additionalSoundKeysButton";
+            _additionalSoundKeysButton.Size = new Size(502, 49);
+            _additionalSoundKeysButton.TabIndex = 19;
+            _additionalSoundKeysButton.Text = "Manage Additional Sound Keys";
+            _toolTipStandard.SetToolTip(_additionalSoundKeysButton, "Use to add more subtitle text if space runs out\r\nor you want to split the text into multiple timestamps.");
+            _additionalSoundKeysButton.UseVisualStyleBackColor = true;
+            // 
+            // _encryptedCheckBox
+            // 
+            _encryptedCheckBox.Location = new Point(419, 192);
+            _encryptedCheckBox.Name = "_encryptedCheckBox";
+            _encryptedCheckBox.Size = new Size(97, 26);
+            _encryptedCheckBox.TabIndex = 18;
+            _encryptedCheckBox.Text = "Encrypted";
+            _encryptedCheckBox.TextAlign = ContentAlignment.TopLeft;
+            _toolTipStandard.SetToolTip(_encryptedCheckBox, resources.GetString("_encryptedCheckBox.ToolTip"));
+            _encryptedCheckBox.UseVisualStyleBackColor = true;
             // 
             // _progressBar
             // 
@@ -218,7 +249,7 @@
             // _fileHeader
             // 
             _fileHeader.Text = "File Name";
-            _fileHeader.Width = 325;
+            _fileHeader.Width = 320;
             // 
             // _jsonHeader
             // 
@@ -298,7 +329,8 @@
             _viewingFileLabel.Name = "_viewingFileLabel";
             _viewingFileLabel.Size = new Size(532, 22);
             _viewingFileLabel.TabIndex = 24;
-            _viewingFileLabel.Text = "You are viewing: no file(s) selected";
+            _viewingFileLabel.Text = "You are viewing:";
+            _viewingFileLabel.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // _textureSpritePanel
             // 
@@ -352,6 +384,7 @@
             _pixelsPerUnitLabel.TabIndex = 18;
             _pixelsPerUnitLabel.Text = "Pixels Per Unit:";
             _pixelsPerUnitLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _toolTipStandard.SetToolTip(_pixelsPerUnitLabel, "Defines the number of pixels per unit for the sprite.");
             // 
             // _formatComboBox
             // 
@@ -427,15 +460,6 @@
             _soundTypeComboBox.Size = new Size(306, 36);
             _soundTypeComboBox.TabIndex = 30;
             // 
-            // _addToMemoryCheckBox
-            // 
-            _addToMemoryCheckBox.Location = new Point(377, 397);
-            _addToMemoryCheckBox.Name = "_addToMemoryCheckBox";
-            _addToMemoryCheckBox.Size = new Size(139, 30);
-            _addToMemoryCheckBox.TabIndex = 29;
-            _addToMemoryCheckBox.Text = "Add To Memory";
-            _addToMemoryCheckBox.UseVisualStyleBackColor = true;
-            // 
             // _subtitleDurationTextBox
             // 
             _subtitleDurationTextBox.Font = new Font("Segoe UI", 12F);
@@ -459,25 +483,6 @@
             _volumeTextBox.Name = "_volumeTextBox";
             _volumeTextBox.Size = new Size(306, 34);
             _volumeTextBox.TabIndex = 23;
-            // 
-            // _additionalSoundKeysButton
-            // 
-            _additionalSoundKeysButton.Location = new Point(14, 219);
-            _additionalSoundKeysButton.Name = "_additionalSoundKeysButton";
-            _additionalSoundKeysButton.Size = new Size(502, 49);
-            _additionalSoundKeysButton.TabIndex = 19;
-            _additionalSoundKeysButton.Text = "Manage Additional Sound Keys";
-            _additionalSoundKeysButton.UseVisualStyleBackColor = true;
-            // 
-            // _encryptedCheckBox
-            // 
-            _encryptedCheckBox.Location = new Point(419, 192);
-            _encryptedCheckBox.Name = "_encryptedCheckBox";
-            _encryptedCheckBox.Size = new Size(97, 26);
-            _encryptedCheckBox.TabIndex = 18;
-            _encryptedCheckBox.Text = "Encrypted";
-            _encryptedCheckBox.TextAlign = ContentAlignment.TopLeft;
-            _encryptedCheckBox.UseVisualStyleBackColor = true;
             // 
             // _soundKeyTextBox
             // 
@@ -544,7 +549,7 @@
             _deleteSelectedJsonsButton.Name = "_deleteSelectedJsonsButton";
             _deleteSelectedJsonsButton.Size = new Size(198, 42);
             _deleteSelectedJsonsButton.TabIndex = 32;
-            _deleteSelectedJsonsButton.Text = "Delete Selected Json Files";
+            _deleteSelectedJsonsButton.Text = "Delete Selected JSON Files";
             _deleteSelectedJsonsButton.UseVisualStyleBackColor = true;
             _deleteSelectedJsonsButton.Click += DeleteSelectedJsonsButton_Click;
             // 

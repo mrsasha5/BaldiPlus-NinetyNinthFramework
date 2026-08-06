@@ -120,11 +120,21 @@
   <metadata name="_toolTipStandard.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="_assetNameLabel.ToolTip" xml:space="preserve">
-    <value>Determines asset name in the game, uses file's name if this field is empty.
-Important notice: helpful methods from Ninety Ninth Framework
-that automatically add your assets to AssetManager (MTM101's API)
-will use asset name as key in the dictionaries.</value>
+  <data name="_volumeMultiplierLabel.ToolTip" xml:space="preserve">
+    <value>Adjusts AudioSource.volume field when the sound is played by an AudioManager instance.
+The AudioManager component uses the following formula for volume calculation:
+AudioSource.volume = volumeMultiplier * volumeModifier
+where volumeModifier is a public field.
+Note: AudioSource.volume is clamped to the [0; 1] range.</value>
+  </data>
+  <data name="_encryptedCheckBox.ToolTip" xml:space="preserve">
+    <value>Activates subtitle encryption support for the first subtitle of the SoundObject.
+The text associated with the localization key must be encrypted by
+the "UnityCipher" package or the Localization Encryptor tool
+(second one can be found in the main form).
+Note: this helps prevent accidental spoilers,
+but it is not entirely secure since anybody can decrypt
+the subtitles using the same software.</value>
   </data>
   <metadata name="_colorDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>191, 17</value>

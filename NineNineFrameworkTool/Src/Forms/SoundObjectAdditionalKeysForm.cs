@@ -10,11 +10,16 @@ using System.Windows.Forms;
 
 namespace NineNineFrameworkTool.Forms
 {
-    public partial class SoundObjectAdditionalKeysForm : Form
+    internal partial class SoundObjectAdditionalKeysForm : Form
     {
+        private DataSet _dataSet;
+
         public SoundObjectAdditionalKeysForm()
         {
             InitializeComponent();
+            _dataSet = new DataSet();
+            _dataGridView.DataSource = _dataSet;
+            //_dataSet.Tables[0].NewRow();
         }
     }
 }

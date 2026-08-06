@@ -118,6 +118,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "RijndaelEncryptorForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Localization Encoder & Decoder";
             ResumeLayout(false);
         }
