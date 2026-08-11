@@ -47,8 +47,6 @@ namespace NineNineFrameworkTool
                     new FirstStartForm().Show();
                 }
 
-                new SoundObjectAdditionalKeysForm().Show();
-
                 Application.Run();
             }
         }

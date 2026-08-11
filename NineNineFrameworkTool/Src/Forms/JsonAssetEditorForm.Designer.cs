@@ -43,6 +43,7 @@
             _addToMemoryCheckBox = new CheckBox();
             _additionalSoundKeysButton = new Button();
             _encryptedCheckBox = new CheckBox();
+            _pixelsPerUnitLabel = new Label();
             _progressBar = new ProgressBar();
             _startButton = new Button();
             _fileListView = new ListView();
@@ -60,7 +61,6 @@
             _sprTitleLabel = new Label();
             _centerTextBox = new TextBox();
             _pixelsPerUnitTextBox = new TextBox();
-            _pixelsPerUnitLabel = new Label();
             _formatComboBox = new ComboBox();
             _texTitleLabel = new Label();
             _assetNameTextBox = new TextBox();
@@ -174,7 +174,7 @@
             _subtitleDurationLabel.TabIndex = 24;
             _subtitleDurationLabel.Text = "Subtitle Duration:";
             _subtitleDurationLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_subtitleDurationLabel, "Defines how long the subtitles will be shown in the game.\r\nThe value is specified in seconds.");
+            _toolTipStandard.SetToolTip(_subtitleDurationLabel, "Defines how long the subtitles will be shown in the game.\r\nThe value is specified in seconds.\r\nSet it to -1, if you want automatically calculated time.\r\nSet it to 0, if subtitles are not available.");
             // 
             // _subtitleColorLabel
             // 
@@ -206,6 +206,7 @@
             _additionalSoundKeysButton.Text = "Manage Additional Sound Keys";
             _toolTipStandard.SetToolTip(_additionalSoundKeysButton, "Use to add more subtitle text if space runs out\r\nor you want to split the text into multiple timestamps.");
             _additionalSoundKeysButton.UseVisualStyleBackColor = true;
+            _additionalSoundKeysButton.Click += AdditionalSoundKeysButton_Click;
             // 
             // _encryptedCheckBox
             // 
@@ -217,6 +218,17 @@
             _encryptedCheckBox.TextAlign = ContentAlignment.TopLeft;
             _toolTipStandard.SetToolTip(_encryptedCheckBox, resources.GetString("_encryptedCheckBox.ToolTip"));
             _encryptedCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // _pixelsPerUnitLabel
+            // 
+            _pixelsPerUnitLabel.Font = new Font("Segoe UI", 12F);
+            _pixelsPerUnitLabel.Location = new Point(14, 226);
+            _pixelsPerUnitLabel.Name = "_pixelsPerUnitLabel";
+            _pixelsPerUnitLabel.Size = new Size(190, 34);
+            _pixelsPerUnitLabel.TabIndex = 18;
+            _pixelsPerUnitLabel.Text = "Pixels Per Unit:";
+            _pixelsPerUnitLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _toolTipStandard.SetToolTip(_pixelsPerUnitLabel, "Defines the number of pixels per unit for the sprite.");
             // 
             // _progressBar
             // 
@@ -375,17 +387,6 @@
             _pixelsPerUnitTextBox.Size = new Size(306, 34);
             _pixelsPerUnitTextBox.TabIndex = 21;
             // 
-            // _pixelsPerUnitLabel
-            // 
-            _pixelsPerUnitLabel.Font = new Font("Segoe UI", 12F);
-            _pixelsPerUnitLabel.Location = new Point(14, 226);
-            _pixelsPerUnitLabel.Name = "_pixelsPerUnitLabel";
-            _pixelsPerUnitLabel.Size = new Size(190, 34);
-            _pixelsPerUnitLabel.TabIndex = 18;
-            _pixelsPerUnitLabel.Text = "Pixels Per Unit:";
-            _pixelsPerUnitLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _toolTipStandard.SetToolTip(_pixelsPerUnitLabel, "Defines the number of pixels per unit for the sprite.");
-            // 
             // _formatComboBox
             // 
             _formatComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -519,7 +520,7 @@
             _assetTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             _assetTypeComboBox.Font = new Font("Segoe UI", 12F);
             _assetTypeComboBox.FormattingEnabled = true;
-            _assetTypeComboBox.Items.AddRange(new object[] { "None", "Texture2D", "Sprite", "Spritesheet", "AudioClip", "SoundObject" });
+            _assetTypeComboBox.Items.AddRange(new object[] { "None", "Texture2D", "Sprite", "AudioClip", "SoundObject" });
             _assetTypeComboBox.Location = new Point(210, 15);
             _assetTypeComboBox.Name = "_assetTypeComboBox";
             _assetTypeComboBox.Size = new Size(306, 36);

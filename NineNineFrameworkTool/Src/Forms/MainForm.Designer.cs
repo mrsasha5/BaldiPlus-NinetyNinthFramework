@@ -35,6 +35,8 @@
             _notifyIcon = new NotifyIcon(components);
             _contextMenuStrip = new ContextMenuStrip(components);
             _jsonAssetToolStripMenuItem = new ToolStripMenuItem();
+            _localizationEncryptorToolStripMenuItem = new ToolStripMenuItem();
+            _colorNormalizerToolStripMenuItem = new ToolStripMenuItem();
             _toolStripSeparator2 = new ToolStripSeparator();
             _closeAppToolStripMenuItem = new ToolStripMenuItem();
             _achievementsButton = new Button();
@@ -78,34 +80,49 @@
             // _contextMenuStrip
             // 
             _contextMenuStrip.DropShadowEnabled = false;
-            _contextMenuStrip.Font = new Font("Segoe UI", 9F);
+            _contextMenuStrip.Font = new Font("Segoe UI", 12F);
             _contextMenuStrip.ImageScalingSize = new Size(20, 20);
-            _contextMenuStrip.Items.AddRange(new ToolStripItem[] { _jsonAssetToolStripMenuItem, _toolStripSeparator2, _closeAppToolStripMenuItem });
+            _contextMenuStrip.Items.AddRange(new ToolStripItem[] { _jsonAssetToolStripMenuItem, _localizationEncryptorToolStripMenuItem, _colorNormalizerToolStripMenuItem, _toolStripSeparator2, _closeAppToolStripMenuItem });
             _contextMenuStrip.Name = "_contextMenuStrip";
-            _contextMenuStrip.Size = new Size(197, 58);
+            _contextMenuStrip.Size = new Size(279, 166);
             _contextMenuStrip.Text = "Ninety-Nine Framework Tools";
             // 
             // _jsonAssetToolStripMenuItem
             // 
             _jsonAssetToolStripMenuItem.Name = "_jsonAssetToolStripMenuItem";
-            _jsonAssetToolStripMenuItem.Size = new Size(196, 24);
+            _jsonAssetToolStripMenuItem.Size = new Size(278, 32);
             _jsonAssetToolStripMenuItem.Text = "JSON Asset Editor";
             _jsonAssetToolStripMenuItem.Click += JsonAssetToolStripMenuItem_Click;
+            // 
+            // _localizationEncryptorToolStripMenuItem
+            // 
+            _localizationEncryptorToolStripMenuItem.Name = "_localizationEncryptorToolStripMenuItem";
+            _localizationEncryptorToolStripMenuItem.Size = new Size(278, 32);
+            _localizationEncryptorToolStripMenuItem.Text = "Localization Encryptor";
+            _localizationEncryptorToolStripMenuItem.Click += LocalizationEncryptorToolStripMenuItem_Click;
+            // 
+            // _colorNormalizerToolStripMenuItem
+            // 
+            _colorNormalizerToolStripMenuItem.Name = "_colorNormalizerToolStripMenuItem";
+            _colorNormalizerToolStripMenuItem.Size = new Size(278, 32);
+            _colorNormalizerToolStripMenuItem.Text = "Color Normalizer";
+            _colorNormalizerToolStripMenuItem.Click += ColorNormalizerToolStripMenuItem_Click;
             // 
             // _toolStripSeparator2
             // 
             _toolStripSeparator2.Name = "_toolStripSeparator2";
-            _toolStripSeparator2.Size = new Size(193, 6);
+            _toolStripSeparator2.Size = new Size(275, 6);
             // 
             // _closeAppToolStripMenuItem
             // 
             _closeAppToolStripMenuItem.Name = "_closeAppToolStripMenuItem";
-            _closeAppToolStripMenuItem.Size = new Size(196, 24);
+            _closeAppToolStripMenuItem.Size = new Size(278, 32);
             _closeAppToolStripMenuItem.Text = "Close App";
             _closeAppToolStripMenuItem.Click += CloseAppToolStripMenuItem_Click;
             // 
             // _achievementsButton
             // 
+            _achievementsButton.Enabled = false;
             _achievementsButton.Location = new Point(279, 80);
             _achievementsButton.Name = "_achievementsButton";
             _achievementsButton.Size = new Size(261, 46);
@@ -133,6 +150,7 @@
             // 
             // _additionsLabel
             // 
+            _additionsLabel.Enabled = false;
             _additionsLabel.Location = new Point(279, 52);
             _additionsLabel.Name = "_additionsLabel";
             _additionsLabel.Size = new Size(261, 25);
@@ -165,8 +183,9 @@
             _colorConverterButton.Name = "_colorConverterButton";
             _colorConverterButton.Size = new Size(261, 46);
             _colorConverterButton.TabIndex = 18;
-            _colorConverterButton.Text = "Open Color Converter";
+            _colorConverterButton.Text = "Open Color Normalizer";
             _colorConverterButton.UseVisualStyleBackColor = true;
+            _colorConverterButton.Click += ColorConverterButton_Click;
             // 
             // MainForm
             // 
@@ -209,5 +228,7 @@
         private Label _otherToolsTitleLabel;
         private Button _textEncryptorButton;
         private Button _colorConverterButton;
+        private ToolStripMenuItem _localizationEncryptorToolStripMenuItem;
+        private ToolStripMenuItem _colorNormalizerToolStripMenuItem;
     }
 }

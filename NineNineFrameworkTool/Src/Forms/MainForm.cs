@@ -51,6 +51,12 @@ namespace NineNineFrameworkTool.Forms
             }
         }
 
+        private void TextureSpriteButton_Click(object? sender, EventArgs e) => OpenForm(new JsonAssetEditorForm());
+
+        private void TextEncryptorButton_Click(object? sender, EventArgs e) => OpenForm(new RijndaelEncryptorForm());
+
+        private void ColorConverterButton_Click(object sender, EventArgs e) => OpenForm(new UnityColorConverterForm());
+
         private void NotifyIconCheckBox_CheckedChanged(object? sender, EventArgs e)
         {
             _notifyIcon.Visible = AppConfigDataManager.Data.NotifyIcon = _notifyIconCheckBox.Checked;
@@ -62,10 +68,19 @@ namespace NineNineFrameworkTool.Forms
             Application.Exit();
         }
 
-        private void TextureSpriteButton_Click(object? sender, EventArgs e) => OpenForm(new JsonAssetEditorForm());
+        private void JsonAssetToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            OpenForm(new JsonAssetEditorForm());
+        }
 
-        private void TextEncryptorButton_Click(object? sender, EventArgs e) => OpenForm(new RijndaelEncryptorForm());
+        private void LocalizationEncryptorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenForm(new RijndaelEncryptorForm());
+        }
 
-        private void JsonAssetToolStripMenuItem_Click(object? sender, EventArgs e) => OpenForm(new JsonAssetEditorForm());
+        private void ColorNormalizerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenForm(new UnityColorConverterForm());
+        }
     }
 }

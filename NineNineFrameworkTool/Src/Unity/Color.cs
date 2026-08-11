@@ -60,6 +60,15 @@ namespace NineNineFrameworkTool.Unity
             return $"{(int)(R * 255)} {(int)(G * 255)} {(int)(B * 255)} {(int)(A * 255)}";
         }
 
+        public string? GetAsString()
+        {
+            try
+            {
+                return $"{R.ToString(CultureInfo.InvariantCulture.NumberFormat)} {G.ToString(CultureInfo.InvariantCulture.NumberFormat)} {B.ToString(CultureInfo.InvariantCulture.NumberFormat)} {A.ToString(CultureInfo.InvariantCulture.NumberFormat)}";
+            }
+            catch { return null; }
+        }
+
         public Color()
         {
             R = 1f;

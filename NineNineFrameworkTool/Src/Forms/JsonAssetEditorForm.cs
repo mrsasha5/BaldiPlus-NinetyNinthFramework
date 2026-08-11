@@ -12,6 +12,8 @@ namespace NineNineFrameworkTool.Forms
 
         private Dictionary<ListViewItem, JsonAssetData> _loadedFiles = new Dictionary<ListViewItem, JsonAssetData>();
 
+        internal SoundObjectAdditionalKeysForm _soundAdditionalKeysForm = new SoundObjectAdditionalKeysForm();
+
         internal static JsonSerializerOptions s_jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
         {
             IncludeFields = true,
@@ -270,7 +272,7 @@ namespace NineNineFrameworkTool.Forms
             else if (_selectedItems.Count == 0)
             {
                 _applyChangesButton.Enabled = false;
-                _textureSpritePanel.Visible = _soundPanel.Visible = false;
+                PrepareToLoad();
                 EnableProperties(false);
                 CleanBaseProperties();
 
@@ -297,6 +299,7 @@ namespace NineNineFrameworkTool.Forms
                 }
 
                 EnableProperties(true);
+                PrepareToLoad();
 
                 if (same)
                 {
@@ -305,7 +308,6 @@ namespace NineNineFrameworkTool.Forms
                 }
                 else
                 {
-                    _textureSpritePanel.Visible = _soundPanel.Visible = false;
                     _viewingFileLabel.Text = "Properties cannot be viewed. They are not same.";
                 }
 
@@ -347,7 +349,13 @@ namespace NineNineFrameworkTool.Forms
             _removeSelectedButton.Enabled = value;
             _fileListView.Enabled = value;
             _startButton.Enabled = value;
+        }
 
+        private void PrepareToLoad()
+        {
+            _textureSpritePanel.Visible = _soundPanel.Visible = false;
+            _soundAdditionalKeysForm.TimedKeys.Clear();
+            _soundAdditionalKeysForm.UpdateTable();
         }
 
         private void CleanBaseProperties()
@@ -369,6 +377,11 @@ namespace NineNineFrameworkTool.Forms
             {
                 _subtitleColorTextBox.Text = Unity.Color.GetFromSystemColor(_colorDialog.Color).GetAsStringNoPercents();
             }
+        }
+
+        private void AdditionalSoundKeysButton_Click(object sender, EventArgs e)
+        {
+            _soundAdditionalKeysForm.Visible = !_soundAdditionalKeysForm.Visible;
         }
     }
 }
