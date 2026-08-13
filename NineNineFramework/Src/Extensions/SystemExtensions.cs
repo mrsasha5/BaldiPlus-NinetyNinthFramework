@@ -3,7 +3,7 @@ using System.Text;
 
 namespace BaldiPlusNineNineFramework.Extensions
 {
-    public static class CSharpExtensions
+    public static class SystemExtensions
     {
         public static string ReplaceExtensionPath(this string path, string newExtension)
         {

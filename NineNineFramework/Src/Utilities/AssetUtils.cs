@@ -3,6 +3,7 @@ using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -12,82 +13,173 @@ namespace BaldiPlusNineNineFramework.Utilities
 {
     public class JsonAssetUtils
     {
-        private static Dictionary<AssetType, Func<string, string, Assembly, object>> loadingMethods = 
-            new Dictionary<AssetType, Func<string, string, Assembly, object>>()
+        private static Dictionary<AssetType, Func<string, string, Assembly, AssetData>> loadingMethods = 
+            new Dictionary<AssetType, Func<string, string, Assembly, AssetData>>()
         {
             { AssetType.Texture2D, LoadTexture2D },
             { AssetType.Sprite, LoadSprite },
+            { AssetType.AudioClip, LoadAudioClip },
             { AssetType.SoundObject, LoadSoundObject }
         };
 
-        public static object LoadEmbeddedAssetFrom(string path, Assembly assembly) => LoadAsset(path, assembly);
-        public static object LoadMyEmbeddedAsset(string path) => LoadAsset(path, Assembly.GetExecutingAssembly());
-        public static object LoadAssetFromFile(string path) => LoadAsset(path, null);
+        public static AssetData LoadEmbeddedAsset(string path, Assembly assembly) => LoadAsset(path, assembly);
+        public static AssetData LoadMyEmbeddedAsset(string path) => LoadAsset(path, Assembly.GetExecutingAssembly());
+        public static AssetData LoadAssetFromFile(string path) => LoadAsset(path, null);
 
-        private static object LoadAsset(string path, Assembly assembly)
+        public void LoadAssetsIntoAssetManager(string[] paths, AssetManager assetManager)
+        {
+            ExceptionUtils.ThrowIfArgumentNull(paths, "paths");
+            ExceptionUtils.ThrowIfArgumentNull(assetManager, "assetManager");
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                AssetData asset = LoadAssetFromFile(paths[i]);
+                asset.AddToAssetManager(assetManager);
+            }
+        }
+
+        public IEnumerator LoadAssetsIntoAssetManagerEnumerator(string[] paths, AssetManager assetManager)
+        {
+            ExceptionUtils.ThrowIfArgumentNull(paths, "paths");
+            ExceptionUtils.ThrowIfArgumentNull(assetManager, "assetManager");
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                AssetData asset = LoadAssetFromFile(paths[i]);
+                yield return asset.AddToAssetManager(assetManager);
+            }
+        }
+
+        private static AssetData LoadAsset(string path, Assembly assembly)
         {
             ExceptionUtils.ThrowIfArgumentNull(path, "path");
 
             string jsonPath = path.ReplaceExtensionPath("json");
-            AssetData data = null;
             string serializedData = null;
 
-            if (File.Exists(jsonPath))
+            if (assembly == null)
             {
                 serializedData = File.ReadAllText(jsonPath);
-                data = JsonConvert.DeserializeObject<AssetData>(serializedData);
             }
             else
             {
-                return null;
+                using (Stream stream = assembly.GetManifestResourceStream(path))
+                    using (StreamReader reader = new StreamReader(stream))
+                        serializedData = reader.ReadToEnd();
             }
 
-            if (!loadingMethods.ContainsKey(data.type))
+            AssetType assetType = ReadAssetType(serializedData);
+            if (!loadingMethods.ContainsKey(assetType))
             {
-                throw new Exception($"{data.type} is not supported.");
+                throw new Exception($"{assetType} is not supported.");
             }
 
-            return loadingMethods[data.type].Invoke(path, serializedData, assembly);
+            return loadingMethods[assetType].Invoke(path, serializedData, assembly);
         }
 
-        private static object LoadTexture2D(string path, string serializedData, Assembly assembly)
+        private static AssetData LoadTexture2D(string path, string serializedData, Assembly assembly)
         {
             Texture2DAssetData data = JsonConvert.DeserializeObject<Texture2DAssetData>(serializedData);
             Texture2D tex = null;
+
             if (assembly == null)
                 tex = AssetLoader.TextureFromFile(path, data.format);
             else
                 tex = AssetUtils.LoadEmbeddedTexture(assembly, path, data.format);
-            tex.name = string.IsNullOrEmpty(data.name) ? Path.GetFileNameWithoutExtension(path) : data.name;
 
-            return tex;
+            tex.name = SystemUtils.ReturnFirstNotNullableString(data.name, Path.GetFileNameWithoutExtension(path));
+            data.path = path;
+            data.texture = tex;
+            return data;
         }
 
-        private static object LoadSprite(string path, string serializedData, Assembly assembly)
+        private static AssetData LoadSprite(string path, string serializedData, Assembly assembly)
         {
             SpriteAssetData data = JsonConvert.DeserializeObject<SpriteAssetData>(serializedData);
             Sprite sprite = null;
+
             if (assembly == null)
                 sprite = AssetLoader.SpriteFromFile(path, data.center, data.pixelsPerUnit);
             else
                 sprite = AssetUtils.LoadEmbeddedSprite(assembly, path, data.pixelsPerUnit, data.center);
-            sprite.name = string.IsNullOrEmpty(data.name) ? Path.GetFileNameWithoutExtension(path) : data.name;
 
-            return sprite;
+            sprite.name = SystemUtils.ReturnFirstNotNullableString(data.name, Path.GetFileNameWithoutExtension(path));
+            data.path = path;
+            data.texture = sprite.texture;
+            data.sprite = sprite;
+            return data;
         }
 
-        private static object LoadSoundObject(string path, string serializedData, Assembly assembly)
+        private static AssetData LoadAudioClip(string path, string serializedData, Assembly assembly)
+        {
+            AudioClipAssetData data = JsonConvert.DeserializeObject<AudioClipAssetData>(serializedData);
+            AudioClip audClip = null;
+
+            if (assembly == null)
+            {
+                audClip = AssetLoader.AudioClipFromFile(path);
+            }
+            else
+            {
+                audClip = AssetUtils.LoadEmbeddedAudioClip(assembly, path);
+            }
+            audClip.name = SystemUtils.ReturnFirstNotNullableString(data.name, Path.GetFileNameWithoutExtension(path));
+            data.path = path;
+            data.clip = audClip;
+            return data;
+        }
+
+        private static AssetData LoadSoundObject(string path, string serializedData, Assembly assembly)
         {
             SoundObjectAssetData data = JsonConvert.DeserializeObject<SoundObjectAssetData>(serializedData);
-            AudioClip audClip = AssetLoader.AudioClipFromFile(path);
-            SoundObject soundObj = ObjectCreators.CreateSoundObject(audClip, data.soundKey, data.soundType, data.color, data.subDuration);
-            soundObj.hasAnimation = data.hasAnimation;
+            AudioClip audClip = null;
+
+            if (assembly == null)
+            {
+                audClip = AssetLoader.AudioClipFromFile(path);
+            }
+            else
+            {
+                audClip = AssetUtils.LoadEmbeddedAudioClip(assembly, path);
+            }
+
+            audClip.name = SystemUtils.ReturnFirstNotNullableString(data.name, Path.GetFileNameWithoutExtension(path));
+
+            SoundObject soundObj = ObjectCreators.CreateSoundObject(audClip, data.soundKey, data.soundType, data.color, 
+                data.subtitleDuration);
+            soundObj.name = audClip.name;
             soundObj.addToMemory = data.addToMemory;
             soundObj.volumeMultiplier = data.volumeMultiplier;
             soundObj.additionalKeys = data.additionalKeys;
             soundObj.encrypted = data.encrypted;
+            data.path = path;
+            data.clip = audClip;
+            data.sound = soundObj;
+            return data;
+        }
 
-            return soundObj;
+        // Try to read it first instead of completely reading JSON data.
+        private static AssetType ReadAssetType(string serializedData)
+        {
+            try
+            {
+                using (StringReader reader = new StringReader(serializedData))
+                {
+                    using (JsonTextReader jsonReader = new JsonTextReader(reader))
+                    {
+                        while (jsonReader.Read())
+                        {
+                            if (jsonReader.TokenType == JsonToken.PropertyName && jsonReader.Value is string val && val == "assetType")
+                            {
+                                jsonReader.Read();
+                                return (AssetType)Enum.Parse(typeof(AssetType), (string)jsonReader.Value);
+                            }
+                        }
+                    }
+                }
+                throw new Exception("Unable to read the assetType parameter from the JSON data!");
+            }
+            catch { throw new Exception("Unable to read the assetType parameter from the JSON data!"); }
         }
     }
 
@@ -106,9 +198,8 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         public static AudioClip LoadEmbeddedAudioClip(Assembly assembly, string path)
         {
-            Stream stream = assembly.GetManifestResourceStream(path);
             string newPath = Path.Combine(NineNineCore.AudioCachePath, $"{audioCounter + 1}{Path.GetExtension(path)}");
-            using (stream)
+            using (Stream stream = assembly.GetManifestResourceStream(path))
             {
                 byte[] data = stream.ToByteArray();
                 File.WriteAllBytes(newPath, data);
@@ -124,10 +215,9 @@ namespace BaldiPlusNineNineFramework.Utilities
         {
             ExceptionUtils.ThrowIfArgumentNull(assembly, "assembly");
             ExceptionUtils.ThrowIfArgumentNull(path, "path");
-
-            Stream stream = assembly.GetManifestResourceStream(path);
+            
             Texture2D tex = null;
-            using (stream)
+            using (Stream stream = assembly.GetManifestResourceStream(path))
             {
                 tex = LoadTextureFromBytes(stream.ToByteArray(), format);
                 tex.name = Path.GetFileNameWithoutExtension(path);

@@ -7,6 +7,7 @@ using BaldiPlusNineNineFramework.Utilities;
 using BepInEx;
 using HarmonyLib;
 using MTM101BaldAPI;
+using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.Registers;
 using UnityEngine;
 
@@ -24,7 +25,8 @@ namespace BaldiPlusNineNineFramework
         internal static string CachePath { get; private set; } = Path.Combine(Application.persistentDataPath, GUID, CACHE_FOLDER);
         internal static string AudioCachePath { get; set; } = Path.Combine(CachePath, "Audio");
 
-        internal static Dictionary<Assembly, PluginInfo> PluginAssemblies { get; private set; } = new Dictionary<Assembly, PluginInfo>();
+        internal static AssetManager VanillaAssets { get; private set; } = new AssetManager();
+        internal static AssetManager Assets { get; private set; } = new AssetManager();
 
         private void Awake()
         {
@@ -35,24 +37,21 @@ namespace BaldiPlusNineNineFramework
             Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, GUID));
             Directory.CreateDirectory(CachePath);
             Directory.CreateDirectory(AudioCachePath);
-            RegisterMyAssembly(Info);
         }
 
-        /// <summary>
-        /// Allows this plugin to understand who owns assembly without using heavy methods. Used for optimizations.
-        /// Recommended to be called on the Awake().
-        /// </summary>
-        /// <param name="info"></param>
-        public static void RegisterMyAssembly(PluginInfo info)
+        internal static void OnSceneUnload()
         {
-            PluginAssemblies.Add(Assembly.GetCallingAssembly(), info);
+            LayerUtils.Initialize();
+            Assets.Add("WelcomeMenu_Play", AssetUtils.LoadMyEmbeddedSprite("Textures/UI/WelcomeMenu_Play.png"));
+            Assets.Add("WelcomeMenu_Updates", AssetUtils.LoadMyEmbeddedSprite("Textures/UI/WelcomeMenu_Updates.png"));
+            Assets.Add("WelcomeMenu_ButtonMask", AssetUtils.LoadMyEmbeddedSprite("Textures/UI/WelcomeMenu_ButtonMask.png"));
+            VanillaAssets.AddFromResourcesNoClones<Sprite>();
         }
 
         private IEnumerator AssetLoader()
         {
             yield return 1;
-            yield return "LOADING TEST.mp3!";
-            AssetUtils.LoadEmbeddedAudioClip(Assembly.GetCallingAssembly(), "TEST.mp3");
+            yield return "Loading game assets...";
         }
 
         private IEnumerator BaseLoader(IEnumerator enumerator)

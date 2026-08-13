@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using MTM101BaldAPI.AssetTools;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
+using System.IO;
 using UnityEngine;
 
 namespace BaldiPlusNineNineFramework.Utilities
 {
-    internal enum AssetType
+    public enum AssetType
     {
         Texture2D,
         Sprite,
@@ -14,7 +17,7 @@ namespace BaldiPlusNineNineFramework.Utilities
     }
 
     [JsonObject(MemberSerialization.OptIn)]
-    internal class AssetData
+    public class AssetData
     {
         [JsonProperty]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -22,25 +25,64 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         [JsonProperty]
         public string name;
+
+        [JsonIgnore]
+        public string path;
+
+        public virtual string AddToAssetManager(AssetManager assetManager) { throw new NotImplementedException(); }
     }
 
-    internal class Texture2DAssetData : AssetData
+    public class Texture2DAssetData : AssetData
     {
         [JsonProperty]
         [JsonConverter(typeof(StringEnumConverter))]
         public TextureFormat format = TextureFormat.RGBA32;
+
+        [JsonIgnore]
+        public Texture2D texture;
+
+        public override string AddToAssetManager(AssetManager assetManager)
+        {
+            assetManager.Add(texture.name, texture);
+            return Path.GetFileName(path);
+        }
     }
 
-    internal class SpriteAssetData : Texture2DAssetData
+    public class SpriteAssetData : Texture2DAssetData
     {
         [JsonProperty]
         public float pixelsPerUnit = 1f;
 
         [JsonProperty]
         public Vector3 center = Vector3.one / 2f;
+
+        [JsonProperty]
+        public bool includeTextureInAssetManager;
+
+        [JsonIgnore]
+        public Sprite sprite;
+
+        public override string AddToAssetManager(AssetManager assetManager)
+        {
+            if (includeTextureInAssetManager) assetManager.Add(texture.name, texture);
+            assetManager.Add(sprite.name, sprite);
+            return Path.GetFileName(path);
+        }
     }
 
-    internal class SoundObjectAssetData : AssetData
+    public class AudioClipAssetData : AssetData
+    {
+        [JsonIgnore]
+        public AudioClip clip;
+
+        public override string AddToAssetManager(AssetManager assetManager)
+        {
+            assetManager.Add(clip.name, clip);
+            return Path.GetFileName(path);
+        }
+    }
+
+    public class SoundObjectAssetData : AudioClipAssetData
     {
         [JsonProperty]
         public string soundKey;
@@ -55,7 +97,7 @@ namespace BaldiPlusNineNineFramework.Utilities
         // 0f = no subtitles
         // -1f = auto-duration
         [JsonProperty]
-        public float subDuration = 0f;
+        public float subtitleDuration = 0f;
 
         [JsonProperty]
         public float volumeMultiplier = 1f;
@@ -67,9 +109,19 @@ namespace BaldiPlusNineNineFramework.Utilities
         public bool encrypted;
 
         [JsonProperty]
-        public bool hasAnimation;
-
-        [JsonProperty]
         public bool addToMemory = true;
+
+        [JsonIgnore]
+        public bool includeClipInAssetManager;
+
+        [JsonIgnore]
+        public SoundObject sound;
+
+        public override string AddToAssetManager(AssetManager assetManager)
+        {
+            if (includeClipInAssetManager) assetManager.Add(clip.name, clip);
+            assetManager.Add(sound.name, sound);
+            return Path.GetFileName(path);
+        }
     }
 }
