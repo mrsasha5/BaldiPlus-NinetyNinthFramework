@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using MonoMod.Utils;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,9 +8,37 @@ namespace BaldiPlusNineNineFramework.Utilities
     /// <summary>
     /// Contains a lot of helper methods for creating objects.
     /// </summary>
-    public class ObjectHelper
+    public class ObjectUtils
     {
         private static FieldInfo _planeDistance = AccessTools.Field(typeof(PlaneDistance), "planeDistance");
+
+        public static AudioManager CreateAudioManager(bool distanceIndependent)
+        {
+            return InitAudioManager(new GameObject("AudioManager"), distanceIndependent);
+        }
+
+        public static AudioManager InitAudioManager(GameObject obj, bool distanceIndependent)
+        {
+            bool active = obj.activeSelf;
+            obj.gameObject.SetActive(false); // Awake() throws an exception since audioDevice is null
+                                             // So using this approach for avoiding it
+            AudioManager audMan = obj.AddComponent<AudioManager>();
+            AudioSource audSrc = obj.AddComponent<AudioSource>(); // To avoid crash on Awake()
+            audMan.audioDevice = audSrc;
+            audSrc.rolloffMode = AudioRolloffMode.Custom;
+            if (distanceIndependent)
+            {
+                audMan.audioDevice.spatialBlend = 0f;
+                audMan.positional = false;
+            }
+            else
+            {
+                audMan.audioDevice.spatialBlend = 1f;
+                audMan.audioDevice.maxDistance = 100f;
+            }
+            obj.gameObject.SetActive(active);
+            return audMan;
+        }
 
         /// <summary>
         /// Creates a new canvas with reference resolution 480x360.

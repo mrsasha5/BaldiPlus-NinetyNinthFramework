@@ -132,8 +132,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\UI\" />
-  </ItemGroup>
-
 </Project>
