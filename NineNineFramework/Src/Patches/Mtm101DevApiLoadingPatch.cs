@@ -33,6 +33,7 @@ namespace BaldiPlusNineNineFramework.Patches
             WelcomeScreen screen = loadingScreen.gameObject.AddComponent<WelcomeScreen>();
             screen.Initialize(loadingScreen);
             screen.InitializeButtons(true);
+            screen.PlayAnimations(delay: 0.75f);
         }
     }
 }

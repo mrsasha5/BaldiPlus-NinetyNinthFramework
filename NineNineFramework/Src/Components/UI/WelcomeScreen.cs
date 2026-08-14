@@ -13,12 +13,15 @@ namespace BaldiPlusNineNineFramework.Components.UI
 {
     public class WelcomeScreenButton : MonoBehaviour
     {
+        private IEnumerator selectAnimation;
+
+        internal Vector2 size;
+
         // References to everything
         public WelcomeScreen screen;
         public Image mainImage;
         public Image maskImage;
-
-        internal Vector2 size;
+        public StandardMenuButton button;
 
         public int priority;
 
@@ -39,12 +42,16 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         public virtual void Select()
         {
-
+            if (selectAnimation != null) StopCoroutine(selectAnimation);
+            selectAnimation = SelectAnimation();
+            StartCoroutine(selectAnimation);
         }
 
         public virtual void Unselect()
         {
-
+            if (selectAnimation != null) StopCoroutine(selectAnimation);
+            selectAnimation = UnselectAnimation();
+            StartCoroutine(selectAnimation);
         }
 
         public void PlaySingleSound(SoundObject sound, float volumeScale = 1f)
@@ -61,10 +68,36 @@ namespace BaldiPlusNineNineFramework.Components.UI
         internal void PlayAppearAnimation(float offsetTime)
         {
             mainImage.rectTransform.localScale = Vector3.zero;
-            StartCoroutine(Animation(offsetTime));
+            StartCoroutine(AppearAnimation(offsetTime));
         }
 
-        private IEnumerator Animation(float offsetTime)
+        private IEnumerator SelectAnimation()
+        {
+            float value = 0f;
+            while (value < 20f)
+            {
+                value += Time.unscaledDeltaTime * 100f;
+                if (value > 20f) value = 20f;
+                mainImage.rectTransform.sizeDelta = size + Vector2.one * value;
+                maskImage.rectTransform.sizeDelta = mainImage.rectTransform.sizeDelta;
+                yield return null;
+            }
+        }
+
+        private IEnumerator UnselectAnimation()
+        {
+            float value = 20f;
+            while (value > 0f)
+            {
+                value -= Time.unscaledDeltaTime * 100f;
+                if (value < 0f) value = 0f;
+                mainImage.rectTransform.sizeDelta = size + Vector2.one * value;
+                maskImage.rectTransform.sizeDelta = mainImage.rectTransform.sizeDelta;
+                yield return null;
+            }
+        }
+
+        private IEnumerator AppearAnimation(float offsetTime)
         {
             while (offsetTime > 0f)
             {
@@ -119,14 +152,27 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private RectTransform animationPoint;
 
+        private int selectedButton = -1;
+
+        private bool animationEnded;
+
+        private float currentPointOffset;
+
+        private float targetPointOffset;
+
         internal AudioManager audMan;
 
         public static void RegisterButton<T>() where T : WelcomeScreenButton 
             => RegisterButton(typeof(T));
         public static void RegisterButton(Type type)
         {
-            if (type.BaseType != typeof(WelcomeScreenButton)) 
-                throw new Exception($"{type.FullName} is not inheriting WelcomeScreenButton! It cannot be registered.");
+            Type baseType = type.BaseType;
+            while (baseType != typeof(WelcomeScreenButton))
+            {
+                baseType = baseType.BaseType;
+                if (baseType == null) 
+                    throw new Exception($"{type.FullName} is not inheriting WelcomeScreenButton! It cannot be registered.");
+            }
             registeredButtons.Add(type);
         }
 
@@ -156,15 +202,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         internal void InitializeButtons(bool animated)
         {
-            float offsetTime = 0f;
             for (int i = 0; i < registeredButtons.Count; i++)
             {
                 WelcomeScreenButton button = InitializeButton(registeredButtons[i]);
-                if (i <= 3)
-                {
-                    button.PlayAppearAnimation(offsetTime);
-                    offsetTime += 0.5f;
-                }
+                if (i <= 2) button.transform.localScale = Vector3.zero;
             }
             buttons.Sort((a, b) => b.priority.CompareTo(a.priority)); // Higher priority => higher order
 
@@ -174,8 +215,59 @@ namespace BaldiPlusNineNineFramework.Components.UI
                 buttons[i].mainImage.rectTransform.localPosition = startPosition;
                 startPosition += offset;
             }
+        }
 
-            StartCoroutine(AnimatePoint());
+        internal void RevealButtonsNoAnimation()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                InitializeButton(registeredButtons[i]).transform.localScale = Vector3.one;
+            }
+            animationPoint.localPosition = Vector3.zero;
+            animationEnded = true;
+        }
+
+        internal void PlayAnimations(float delay) => StartCoroutine(StartAnimations(delay));
+
+        private void Update()
+        {
+            if (currentPointOffset != targetPointOffset)
+            {
+                currentPointOffset = Mathf.MoveTowards(currentPointOffset, targetPointOffset, Time.unscaledDeltaTime * 400f);
+                animationPoint.localPosition = Vector3.right * currentPointOffset;
+            }
+
+            if (animationEnded && currentPointOffset == targetPointOffset)
+            {
+                if (selectedButton < 0)
+                {
+                    selectedButton = 0;
+                    buttons[selectedButton].Select();
+                }
+
+                if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.D) || 
+                    Input.GetKeyDown(KeyCode.S))
+                {
+                    if (selectedButton + 1 < buttons.Count)
+                    {
+                        buttons[selectedButton].Unselect();
+                        selectedButton++;
+                        buttons[selectedButton].Select();
+                        targetPointOffset = selectedButton * -150;
+                    }
+                }
+                else if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.A) || 
+                    Input.GetKeyDown(KeyCode.W))
+                {
+                    if (selectedButton - 1 >= 0)
+                    {
+                        buttons[selectedButton].Unselect();
+                        selectedButton--;
+                        buttons[selectedButton].Select();
+                        targetPointOffset = selectedButton * -150;
+                    }
+                }
+            }
         }
 
         internal void Close()
@@ -203,11 +295,31 @@ namespace BaldiPlusNineNineFramework.Components.UI
             button.mainImage = bordersImage;
             button.maskImage = maskImage;
             button.Initialize();
-
-            bordersImage.gameObject.ConvertToButton<StandardMenuButton>();
+            button.button = bordersImage.gameObject.ConvertToButton<StandardMenuButton>();
 
             buttons.Add(button);
             return button;
+        }
+
+        private IEnumerator StartAnimations(float delay)
+        {
+            while (delay > 0f)
+            {
+                delay -= Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            float offsetTime = 0f;
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                if (i <= 2)
+                {
+                    buttons[i].PlayAppearAnimation(offsetTime);
+                    offsetTime += 0.5f;
+                }
+                else break;
+            }
+            StartCoroutine(AnimatePoint());
         }
 
         private IEnumerator AnimatePoint()
@@ -228,6 +340,8 @@ namespace BaldiPlusNineNineFramework.Components.UI
                 animationPoint.localPosition = Vector3.right * value;
                 yield return null;
             }
+
+            animationEnded = true;
         }
     }
 }
