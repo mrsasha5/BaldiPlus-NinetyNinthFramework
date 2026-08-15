@@ -7,7 +7,10 @@ namespace BaldiPlusNineNineFramework.Extensions
     {
         public static string ReplaceExtensionPath(this string path, string newExtension)
         {
-            return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + $".{newExtension}");
+            // This approach more friendly since it's not modifying the path much
+            // Unlke what Path.Combine can do
+            return path.Replace(Path.GetFileName(path), Path.GetFileNameWithoutExtension(path) + $".{newExtension}");
+            //return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + $".{newExtension}");
         }
 
         public static string Replace(this string value, char oldChar, char newChar, int count)

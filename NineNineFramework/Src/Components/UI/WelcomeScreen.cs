@@ -59,10 +59,12 @@ namespace BaldiPlusNineNineFramework.Components.UI
             screen.audMan.PlaySingle(sound, volumeScale);
         }
 
-        public void InitializeBackground(Sprite sprite)
+        public Image CreateImage(Sprite sprite)
         {
-            Image bg = UIHelpers.CreateImage(sprite, maskImage.transform, Vector3.zero, false);
-            bg.rectTransform.SetCenterAnchor();
+            Image image = UIHelpers.CreateImage(sprite, maskImage.transform, Vector3.zero, false);
+            image.name = "Image";
+            image.rectTransform.SetCenterAnchor();
+            return image;
         }
 
         internal void PlayAppearAnimation(float offsetTime)
@@ -106,6 +108,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             }
 
             PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("CampfireToss"), 2f);
+            PlayAnimation();
 
             float speed = 3f;
             float value = 0f;
@@ -125,10 +128,18 @@ namespace BaldiPlusNineNineFramework.Components.UI
                 yield return null;
             }
 
-            while (value < 1f)
+            while (value < 1.05f)
             {
-                value += Time.unscaledDeltaTime * speed;
-                if (value > 1f) value = 1f;
+                value += Time.unscaledDeltaTime * speed * 0.5f;
+                if (value > 1.05f) value = 1.05f;
+                mainImage.rectTransform.localScale = Vector3.one * value;
+                yield return null;
+            }
+
+            while (value > 1f)
+            {
+                value -= Time.unscaledDeltaTime * speed * 0.25f;
+                if (value < 1f) value = 1f;
                 mainImage.rectTransform.localScale = Vector3.one * value;
                 yield return null;
             }
@@ -279,13 +290,14 @@ namespace BaldiPlusNineNineFramework.Components.UI
         {
             Image bordersImage = UIHelpers.CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("TooltipBG"), animationPoint,
                 Vector3.zero, false);
-            bordersImage.name = $"Button_{type.FullName}";
+            bordersImage.name = $"Button_{type.Name}";
             bordersImage.type = Image.Type.Sliced;
             bordersImage.rectTransform.sizeDelta = new Vector2(128f, 250f);
             bordersImage.rectTransform.SetCenterAnchor();
 
             Image maskImage = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_ButtonMask"),
                 bordersImage.transform, Vector3.zero, false);
+            maskImage.name = "MaskImage";
             maskImage.rectTransform.SetCenterAnchor();
             maskImage.gameObject.AddComponent<Mask>();
 

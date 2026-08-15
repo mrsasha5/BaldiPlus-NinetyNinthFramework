@@ -22,35 +22,43 @@ namespace BaldiPlusNineNineFramework.Utilities
             { AssetType.SoundObject, LoadSoundObject }
         };
 
-        public static AssetData LoadEmbeddedAsset(string path, Assembly assembly) => LoadAsset(path, assembly);
-        public static AssetData LoadMyEmbeddedAsset(string path) => LoadAsset(path, Assembly.GetExecutingAssembly());
-        public static AssetData LoadAssetFromFile(string path) => LoadAsset(path, null);
+        public static AssetData LoadEmbeddedAsset(Assembly assembly, string path) => LoadAsset(assembly, path);
+        public static AssetData LoadMyEmbeddedAsset(string path) => LoadAsset(Assembly.GetExecutingAssembly(), path);
+        public static AssetData LoadAssetFromFile(string path) => LoadAsset(null, path);
 
-        public void LoadAssetsIntoAssetManager(string[] paths, AssetManager assetManager)
+        public static void LoadAssetsIntoAssetManager(AssetManager assetManager, Assembly assembly, string[] paths)
         {
             ExceptionUtils.ThrowIfArgumentNull(paths, "paths");
             ExceptionUtils.ThrowIfArgumentNull(assetManager, "assetManager");
 
             for (int i = 0; i < paths.Length; i++)
             {
-                AssetData asset = LoadAssetFromFile(paths[i]);
+                if (Path.GetExtension(paths[i]) == ".json") continue;
+
+                AssetData asset;
+                if (assembly == null) asset = LoadAssetFromFile(paths[i]);
+                else asset = LoadEmbeddedAsset(assembly, paths[i]);
                 asset.AddToAssetManager(assetManager);
             }
         }
 
-        public IEnumerator LoadAssetsIntoAssetManagerEnumerator(string[] paths, AssetManager assetManager)
+        public static IEnumerator LoadAssetsIntoAssetManagerEnumerator(AssetManager assetManager, Assembly assembly, string[] paths)
         {
             ExceptionUtils.ThrowIfArgumentNull(paths, "paths");
             ExceptionUtils.ThrowIfArgumentNull(assetManager, "assetManager");
 
             for (int i = 0; i < paths.Length; i++)
             {
-                AssetData asset = LoadAssetFromFile(paths[i]);
+                if (Path.GetExtension(paths[i]) == ".json") continue;
+
+                AssetData asset;
+                if (assembly == null) asset = LoadAssetFromFile(paths[i]);
+                else asset = LoadEmbeddedAsset(assembly, paths[i]);
                 yield return asset.AddToAssetManager(assetManager);
             }
         }
 
-        private static AssetData LoadAsset(string path, Assembly assembly)
+        private static AssetData LoadAsset(Assembly assembly, string path)
         {
             ExceptionUtils.ThrowIfArgumentNull(path, "path");
 
@@ -63,7 +71,7 @@ namespace BaldiPlusNineNineFramework.Utilities
             }
             else
             {
-                using (Stream stream = assembly.GetManifestResourceStream(path))
+                using (Stream stream = assembly.GetManifestResourceStream(jsonPath))
                     using (StreamReader reader = new StreamReader(stream))
                         serializedData = reader.ReadToEnd();
             }
@@ -145,8 +153,8 @@ namespace BaldiPlusNineNineFramework.Utilities
 
             audClip.name = SystemUtils.ReturnFirstNotNullableString(data.name, Path.GetFileNameWithoutExtension(path));
 
-            SoundObject soundObj = ObjectCreators.CreateSoundObject(audClip, data.soundKey, data.soundType, data.color, 
-                data.subtitleDuration);
+            SoundObject soundObj = ObjectCreators.CreateSoundObject(audClip, data.soundKey, data.soundType, data.color,
+                string.IsNullOrEmpty(data.soundKey) ? 0f : data.subtitleDuration);
             soundObj.name = audClip.name;
             soundObj.addToMemory = data.addToMemory;
             soundObj.volumeMultiplier = data.volumeMultiplier;
@@ -161,7 +169,22 @@ namespace BaldiPlusNineNineFramework.Utilities
         // Try to read it first instead of completely reading JSON data.
         private static AssetType ReadAssetType(string serializedData)
         {
-            try
+            using (StringReader reader = new StringReader(serializedData))
+            {
+                using (JsonTextReader jsonReader = new JsonTextReader(reader))
+                {
+                    while (jsonReader.Read())
+                    {
+                        if (jsonReader.TokenType == JsonToken.PropertyName && jsonReader.Value is string val && val == "assetType")
+                        {
+                            jsonReader.Read();
+                            return (AssetType)Enum.Parse(typeof(AssetType), (string)jsonReader.Value);
+                        }
+                    }
+                }
+            }
+            throw new Exception();
+            /*try
             {
                 using (StringReader reader = new StringReader(serializedData))
                 {
@@ -179,13 +202,24 @@ namespace BaldiPlusNineNineFramework.Utilities
                 }
                 throw new Exception("Unable to read the assetType parameter from the JSON data!");
             }
-            catch { throw new Exception("Unable to read the assetType parameter from the JSON data!"); }
+            catch { throw new Exception("Unable to read the assetType parameter from the JSON data!"); }*/
         }
     }
 
     public class AssetUtils
     {
         private static int audioCounter = 0;
+
+        public static List<string> GetFilesFromEmbeddedFolder(Assembly assembly, string path)
+        {
+            List<string> paths = new List<string>();
+            string[] resourceNames = assembly.GetManifestResourceNames();
+            for (int i = 0; i < resourceNames.Length; i++)
+            {
+                if (resourceNames[i].StartsWith(path)) paths.Add(resourceNames[i]);
+            }
+            return paths;
+        }
 
         public static Texture2D LoadTextureFromBytes(byte[] bytes, TextureFormat format = TextureFormat.RGBA32)
         {

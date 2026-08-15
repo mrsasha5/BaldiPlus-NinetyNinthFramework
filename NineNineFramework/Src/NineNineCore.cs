@@ -41,16 +41,13 @@ namespace BaldiPlusNineNineFramework
 
             WelcomeScreen.RegisterButton<WelcomePlayButton>();
             WelcomeScreen.RegisterButton<WelcomeUpdateButton>();
-            WelcomeScreen.RegisterButton<WelcomeUpdateButton>();
-            WelcomeScreen.RegisterButton<WelcomeUpdateButton>();
         }
 
         internal static void OnSceneUnload()
         {
             LayerUtils.Initialize();
-            Assets.Add("WelcomeMenu_Play", AssetUtils.LoadMyEmbeddedSprite("Textures/UI/WelcomeMenu_Play.png"));
-            Assets.Add("WelcomeMenu_Updates", AssetUtils.LoadMyEmbeddedSprite("Textures/UI/WelcomeMenu_Updates.png"));
-            Assets.Add("WelcomeMenu_ButtonMask", AssetUtils.LoadMyEmbeddedSprite("Textures/UI/WelcomeMenu_ButtonMask.png"));
+            JsonAssetUtils.LoadAssetsIntoAssetManager(Assets, Assembly.GetExecutingAssembly(), 
+                AssetUtils.GetFilesFromEmbeddedFolder(Assembly.GetExecutingAssembly(), "JsonAssets").ToArray());
             VanillaAssets.AddFromResourcesNoClones<Sprite>();
             VanillaAssets.AddFromResourcesNoClones<SoundObject>();
         }
