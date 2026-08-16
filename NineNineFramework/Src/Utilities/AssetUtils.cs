@@ -169,22 +169,7 @@ namespace BaldiPlusNineNineFramework.Utilities
         // Try to read it first instead of completely reading JSON data.
         private static AssetType ReadAssetType(string serializedData)
         {
-            using (StringReader reader = new StringReader(serializedData))
-            {
-                using (JsonTextReader jsonReader = new JsonTextReader(reader))
-                {
-                    while (jsonReader.Read())
-                    {
-                        if (jsonReader.TokenType == JsonToken.PropertyName && jsonReader.Value is string val && val == "assetType")
-                        {
-                            jsonReader.Read();
-                            return (AssetType)Enum.Parse(typeof(AssetType), (string)jsonReader.Value);
-                        }
-                    }
-                }
-            }
-            throw new Exception();
-            /*try
+            try
             {
                 using (StringReader reader = new StringReader(serializedData))
                 {
@@ -202,7 +187,7 @@ namespace BaldiPlusNineNineFramework.Utilities
                 }
                 throw new Exception("Unable to read the assetType parameter from the JSON data!");
             }
-            catch { throw new Exception("Unable to read the assetType parameter from the JSON data!"); }*/
+            catch { throw new Exception("Unable to read the assetType parameter from the JSON data!"); }
         }
     }
 
@@ -210,7 +195,7 @@ namespace BaldiPlusNineNineFramework.Utilities
     {
         private static int audioCounter = 0;
 
-        public static List<string> GetFilesFromEmbeddedFolder(Assembly assembly, string path)
+        public static List<string> GetPathsFromEmbeddedStartingWith(Assembly assembly, string path)
         {
             List<string> paths = new List<string>();
             string[] resourceNames = assembly.GetManifestResourceNames();

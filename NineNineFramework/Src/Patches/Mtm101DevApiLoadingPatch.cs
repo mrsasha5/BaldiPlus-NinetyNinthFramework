@@ -1,4 +1,5 @@
 ﻿using BaldiPlusNineNineFramework.Components.UI;
+using BaldiPlusNineNineFramework.Managers;
 using HarmonyLib;
 using MTM101BaldAPI;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace BaldiPlusNineNineFramework.Patches
         [HarmonyPrefix]
         private static bool OnStart(ModLoadingScreenManager __instance)
         {
-            if (!welcomeInstantiated)
+            if (!welcomeInstantiated && ConfigManager.welcomeMenu.Value)
             {
                 InitializeWelcomeScreen(__instance);
                 return false;
@@ -33,7 +34,8 @@ namespace BaldiPlusNineNineFramework.Patches
             WelcomeScreen screen = loadingScreen.gameObject.AddComponent<WelcomeScreen>();
             screen.Initialize(loadingScreen);
             screen.InitializeButtons(true);
-            screen.PlayAnimations(delay: 0.75f);
+            if (ConfigManager.welcomeMenuAnimations.Value) screen.RevealButtons(animationDelayTime: 0.75f);
+            else screen.RevealButtonsNoAnimation();
         }
     }
 }

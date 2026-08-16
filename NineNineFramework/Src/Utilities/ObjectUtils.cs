@@ -1,31 +1,36 @@
-﻿using HarmonyLib;
-using System.Reflection;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace BaldiPlusNineNineFramework.Utilities
 {
-    /// <summary>
-    /// Contains a lot of helper methods for creating objects.
-    /// </summary>
+    [Flags]
+    public enum AudioManagerSources
+    {
+        Sfx,
+        Vfx,
+        Music
+    }
+
     public class ObjectUtils
     {
-        private static FieldInfo _planeDistance = AccessTools.Field(typeof(PlaneDistance), "planeDistance");
-
-        public static AudioManager CreateAudioManager(bool distanceIndependent)
+        public static AudioManager CreateAudioManager(bool distanceIndependent, AudioManagerSources sources = AudioManagerSources.Sfx, 
+            bool subtitles = true, Color? subtitleColor = null)
         {
-            return InitAudioManager(new GameObject("AudioManager"), distanceIndependent);
+            return AddAudioManager(new GameObject("AudioManager"), distanceIndependent, sources, subtitles, subtitleColor);
         }
 
-        public static AudioManager InitAudioManager(GameObject obj, bool distanceIndependent)
+        public static AudioManager AddAudioManager(GameObject gameObject, bool distanceIndependent,
+            AudioManagerSources sources = AudioManagerSources.Sfx, bool subtitles = true, Color? subtitleColor = null)
         {
-            bool active = obj.activeSelf;
-            obj.gameObject.SetActive(false); // Awake() throws an exception since audioDevice is null
-                                             // So using this approach for avoiding it
-            AudioManager audMan = obj.AddComponent<AudioManager>();
-            AudioSource audSrc = obj.AddComponent<AudioSource>(); // To avoid crash on Awake()
+            bool active = gameObject.activeSelf;
+            gameObject.gameObject.SetActive(false); // Awake() throws an exception since audioDevice is null
+                                                    // So using this approach for avoiding it
+            AudioManager audMan = gameObject.AddComponent<AudioManager>();
+            AudioSource audSrc = gameObject.AddComponent<AudioSource>(); // To avoid crash on Awake()
             audMan.audioDevice = audSrc;
             audSrc.rolloffMode = AudioRolloffMode.Custom;
+
             if (distanceIndependent)
             {
                 audMan.audioDevice.spatialBlend = 0f;
@@ -36,7 +41,17 @@ namespace BaldiPlusNineNineFramework.Utilities
                 audMan.audioDevice.spatialBlend = 1f;
                 audMan.audioDevice.maxDistance = 100f;
             }
-            obj.gameObject.SetActive(active);
+
+            audMan.disableSubtitles = !subtitles;
+            audMan.usesSfx = sources.HasFlag(AudioManagerSources.Sfx);
+            audMan.usesVfx = sources.HasFlag(AudioManagerSources.Vfx);
+            audMan.usesMusic = sources.HasFlag(AudioManagerSources.Music);
+            if (subtitles && subtitleColor != null)
+            {
+                audMan.subtitleColor = subtitleColor.Value;
+            }
+
+            gameObject.gameObject.SetActive(active);
             return audMan;
         }
 
@@ -67,7 +82,7 @@ namespace BaldiPlusNineNineFramework.Utilities
             canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
             canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvasScaler.scaleFactor = 1f;
-            _planeDistance.SetValue(obj.AddComponent<PlaneDistance>(), planeDistance);
+            obj.AddComponent<PlaneDistance>().planeDistance = planeDistance;
             canvas.planeDistance = planeDistance;
 
             if (setGlobalCam) canvas.worldCamera = GlobalCam.Instance.Cam;

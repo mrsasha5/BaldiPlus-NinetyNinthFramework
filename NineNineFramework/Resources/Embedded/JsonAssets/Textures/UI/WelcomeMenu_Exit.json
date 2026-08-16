@@ -1,0 +1,11 @@
+{
+  "assetType": "Sprite",
+  "formatVersion": "1.0.0.0",
+  "name": null,
+  "format": "RGBA32",
+  "pixelsPerUnit": 1,
+  "center": {
+    "x": 0.5,
+    "y": 0.5
+  }
+}

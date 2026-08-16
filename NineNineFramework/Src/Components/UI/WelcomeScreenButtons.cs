@@ -1,4 +1,5 @@
 ﻿using BaldiPlusNineNineFramework.Extensions;
+using BaldiPlusNineNineFramework.Utilities;
 using MTM101BaldAPI.UI;
 using System.Collections;
 using TMPro;
@@ -11,14 +12,16 @@ namespace BaldiPlusNineNineFramework.Components.UI
     {
         private Image[] images = new Image[5];
 
+        private IEnumerator animator;
+        private IEnumerator[] bgAnimators;
+
         public override void Initialize()
         {
             base.Initialize();
             priority = 128;
-            CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Play"));
+            CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Play")).name = "Background";
 
-            // Slap_Sheet_0 (5)
-            images[0] = CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_4"));
+            images[0] = CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_0"));
             images[0].name = "Baldi";
             images[0].rectTransform.localPosition = new Vector3(10f, -38f, 0f);
 
@@ -38,24 +41,137 @@ namespace BaldiPlusNineNineFramework.Components.UI
             playImage.name = "Play";
             playImage.rectTransform.localPosition = Vector3.up * -88f;
         }
+
+        public override void PlayAnimation()
+        {
+            base.PlayAnimation();
+            if (animator == null)
+            {
+                animator = MainAnimation();
+                StartCoroutine(animator);
+            }
+        }
+
+        public override void PlayBackgroundAnimation()
+        {
+            base.PlayBackgroundAnimation();
+            if (bgAnimators == null)
+            {
+                bgAnimators = new IEnumerator[4];
+                float[] time = new float[4] { 0f, 0.5f, 0.25f, 0.75f };
+                for (int i = 0; i < bgAnimators.Length; i++)
+                {
+                    bgAnimators[i] = BackgroundAnimation(images[i + 1], time[i], i % 2 == 0);
+                    StartCoroutine(bgAnimators[i]);
+                }
+            }
+        }
+
+        private IEnumerator BackgroundAnimation(Image questionMark, float time, bool state)
+        {
+            Vector3 mainPos = questionMark.rectTransform.localPosition;
+            float maxValue = 5f;
+            float startValue = 0f;
+            float duration = 1f;
+
+            float value = 0f;
+            float targetValue = state ? maxValue : -maxValue;
+
+            while (true)
+            {
+                time += Time.unscaledDeltaTime / duration;
+                float smoothStep = Mathf.SmoothStep(0f, 1f, time);
+                value = Mathf.Lerp(startValue, targetValue, smoothStep);
+                questionMark.rectTransform.localPosition = mainPos + Vector3.up * value;
+
+                if (time >= 1f)
+                {
+                    value = targetValue;
+                    state = !state;
+
+                    time = 0f;
+                    startValue = value;
+                    targetValue = state ? maxValue : -maxValue;
+                }
+
+                yield return null;
+            }
+        }
+
+        private IEnumerator MainAnimation()
+        {
+            Sprite[] sprites = new Sprite[]
+            {
+                NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_4"),
+                NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_3"),
+                NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_2"),
+                NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_1"),
+                NineNineCore.VanillaAssets.Get<Sprite>("Slap_Sheet_0"),
+            };
+
+            int counter = 2;
+            while (counter > 0)
+            {
+                float time = 0.25f;
+                while (time > 0f)
+                {
+                    time -= Time.unscaledDeltaTime;
+                    yield return null;
+                }
+
+                PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("BAL_Slap"));
+                images[0].sprite = sprites[0];
+                time = 0.1f;
+                while (time > 0f)
+                {
+                    time -= Time.unscaledDeltaTime;
+                    yield return null;
+                }
+                float animationTime = 1f;
+                while (animationTime > 0f)
+                {
+                    animationTime -= Time.unscaledDeltaTime * 2f;
+                    if (animationTime < 0f) animationTime = 0f;
+                    images[0].sprite = sprites[(int)(4 * (1f - animationTime))];
+                    yield return null;
+                }
+                counter--;
+            }
+
+            animator = null;
+        }
     }
 
     public class WelcomeUpdateButton : WelcomeScreenButton
     {
-        private Image arrowsImage;
+        private Image arrowImage;
+        private Image[] fileImages;
 
         private IEnumerator animator;
+        private IEnumerator bgAnimator;
 
         public override void Initialize()
         {
             base.Initialize();
             priority = 64;
-            CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Updates"));
+            CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Updates")).name = "Background";
+            fileImages = new Image[3];
 
-            arrowsImage = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>("SpinningArrows"), maskImage.rectTransform,
+            Vector3[] filePositions = new Vector3[] { new Vector3(-120f, -25f, 0f), new Vector3(-120f, -25f, 0f), 
+                new Vector3(120f, 25f, 0f) };
+            for (int i = 0; i < fileImages.Length; i++)
+            {
+                fileImages[i] = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>($"FileIcon_{i + 1}"), maskImage.rectTransform,
+                    Vector3.zero, false);
+                fileImages[i].name = fileImages[i].sprite.name;
+                fileImages[i].rectTransform.SetCenterAnchor();
+                fileImages[i].rectTransform.localPosition = filePositions[i];
+            }
+
+            arrowImage = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>("SpinningArrows"), maskImage.rectTransform,
                 Vector3.zero, false);
-            arrowsImage.name = "Arrows";
-            arrowsImage.rectTransform.SetCenterAnchor();
+            arrowImage.name = "Arrows";
+            arrowImage.rectTransform.SetCenterAnchor();
 
             TextMeshProUGUI updatesCenterText = UIHelpers.CreateText<TextMeshProUGUI>(BaldiFonts.ComicSans24, "Update\nCenter", 
                 maskImage.rectTransform, Vector3.zero, false);
@@ -74,10 +190,58 @@ namespace BaldiPlusNineNineFramework.Components.UI
         public override void PlayAnimation()
         {
             base.PlayAnimation();
-            if (animator == null) StartCoroutine(ThumbnailAnimation());
+            if (animator == null)
+            {
+                animator = MainAnimation();
+                StartCoroutine(animator);
+            }
         }
 
-        private IEnumerator ThumbnailAnimation()
+        public override void PlayBackgroundAnimation()
+        {
+            base.PlayBackgroundAnimation();
+            if (bgAnimator == null)
+            {
+                bgAnimator = BackgroundAnimation();
+                StartCoroutine(bgAnimator);
+            }
+        }
+
+        private IEnumerator BackgroundAnimation()
+        {
+            float speed = 300f;
+            float maxAxisValue = 120f;
+            Vector3[] filePositions = new Vector3[fileImages.Length];
+            for (int i = 0; i < fileImages.Length; i++)
+            {
+                filePositions[i] = fileImages[i].rectTransform.localPosition; 
+            }
+            int index = 0;
+            while (true)
+            {
+                if (filePositions[index].x < 0f) // If the file comes from the left side
+                {
+                    while (fileImages[index].rectTransform.localPosition.x < maxAxisValue)
+                    {
+                        fileImages[index].rectTransform.localPosition += Vector3.right * Time.unscaledDeltaTime * speed;
+                        yield return null;
+                    }
+                }
+                else
+                {
+                    while (fileImages[index].rectTransform.localPosition.x > -maxAxisValue)
+                    {
+                        fileImages[index].rectTransform.localPosition -= Vector3.right * Time.unscaledDeltaTime * speed;
+                        yield return null;
+                    }
+                }
+                fileImages[index].rectTransform.localPosition = filePositions[index];
+                index++;
+                if (index > filePositions.Length - 1) index = 0;
+            }
+        }
+
+        private IEnumerator MainAnimation()
         {
             PlaySingleSound(NineNineCore.Assets.Get<SoundObject>("Mechanism"));
             float maxAngle = 720f;
@@ -87,10 +251,111 @@ namespace BaldiPlusNineNineFramework.Components.UI
             {
                 value += Time.unscaledDeltaTime * speed;
                 if (value > maxAngle) value = maxAngle;
-                arrowsImage.rectTransform.rotation = Quaternion.Euler(0f, 0f, -value);
+                arrowImage.rectTransform.rotation = Quaternion.Euler(0f, 0f, -value);
                 yield return null;
             }
 
+            animator = null;
+        }
+    }
+
+    public class WelcomeExitButton : WelcomeScreenButton
+    {
+        private Image firstPrizeImage;
+        private Image doorImage;
+        private IEnumerator animator;
+        private IEnumerator bgAnimator;
+        private AudioManager audMan;
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit")).name = "Background";
+
+            doorImage = CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit_Door_2"));
+            doorImage.name = "Door";
+            doorImage.rectTransform.localPosition = new Vector3(32f, -10f, 0f);
+
+            Image arrow = CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("Arrow_Sprite_Sheet_7"));
+            arrow.name = "Arrow";
+            arrow.rectTransform.localPosition = new Vector3(-15f, -13f, 0f);
+
+            Image prizeMask = CreateImage(NineNineCore.Assets.Get<Sprite>("WhitePixel"));
+            prizeMask.name = "FirstPrizeMask";
+            prizeMask.rectTransform.localPosition = new Vector3(-18f, -113f, 0f);
+            prizeMask.rectTransform.sizeDelta = new Vector2(150f, 300f);
+            prizeMask.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+
+            firstPrizeImage = CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("1PrizeSprites_9"), prizeMask.transform);
+            firstPrizeImage.name = "FirstPrize";
+            firstPrizeImage.rectTransform.localPosition = new Vector3(-60, -60f, 0f);
+            firstPrizeImage.rectTransform.localScale = Vector3.one * 0.5f;
+
+            Image exitSign = CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("ExitSignSprite"));
+            exitSign.name = "ExitSign";
+            exitSign.rectTransform.localPosition = Vector3.up * 89f;
+
+            audMan = ObjectUtils.AddAudioManager(gameObject, true, AudioManagerSources.Sfx, false);
+        }
+
+        public override void PlayAnimation()
+        {
+            base.PlayAnimation();
+            if (animator == null)
+            {
+                animator = MainAnimation();
+                StartCoroutine(animator);
+            }
+        }
+
+        public override void PlayBackgroundAnimation()
+        {
+            base.PlayBackgroundAnimation();
+            if (bgAnimator == null)
+            {
+                bgAnimator = BackgroundAnimation();
+                StartCoroutine(bgAnimator);
+            }
+        }
+
+        private IEnumerator BackgroundAnimation()
+        {
+            yield break;
+        }
+
+        private IEnumerator MainAnimation()
+        {
+            doorImage.sprite = NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit_Door_2");
+
+            Vector3 startPos = firstPrizeImage.rectTransform.localPosition;
+            Vector3 startScale = firstPrizeImage.rectTransform.localScale;
+            Vector3 endPos = new Vector3(140f, 185f, 0f);
+            Vector3 endScale = Vector3.one * 0.1f;
+            float totalTime = 4f;
+
+            audMan.QueueAudio(NineNineCore.VanillaAssets.Get<SoundObject>("1PR_Motor"));
+            audMan.SetLoop(true);
+
+            float time = totalTime;
+            Vector3 direction = endPos - startPos;
+            Vector3 additionalScale = endScale - startScale;
+            while (time > 0f)
+            {
+                time -= Time.unscaledDeltaTime;
+                if (time < 0f) time = 0f;
+                float value = (totalTime - time) / totalTime;
+                firstPrizeImage.rectTransform.localPosition = startPos + direction * value;
+                firstPrizeImage.rectTransform.localScale = startScale + additionalScale * value;
+                audMan.pitchModifier = 1f + value * 2.5f;
+                yield return null;
+            }
+
+            audMan.FlushQueue(true);
+            doorImage.sprite = NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit_Door_1");
+            PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("Doors_StandardShut"));
+
+            firstPrizeImage.rectTransform.localPosition = startPos;
+            firstPrizeImage.rectTransform.localScale = startScale;
             animator = null;
         }
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using BaldiPlusNineNineFramework.Components.UI;
+using BaldiPlusNineNineFramework.Managers;
 using BaldiPlusNineNineFramework.Utilities;
 using BepInEx;
 using HarmonyLib;
@@ -28,11 +29,14 @@ namespace BaldiPlusNineNineFramework
 
         internal static AssetManager VanillaAssets { get; private set; } = new AssetManager();
         internal static AssetManager Assets { get; private set; } = new AssetManager();
+        internal static NineNineCore Instance { get; private set; }
 
         private void Awake()
         {
+            Instance = this;
             Harmony harmony = new Harmony(GUID);
             harmony.PatchAllConditionals();
+            ConfigManager.Initialize();
             LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(AssetLoader()), LoadingEventOrder.Start);
 
             Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, GUID));
@@ -41,13 +45,14 @@ namespace BaldiPlusNineNineFramework
 
             WelcomeScreen.RegisterButton<WelcomePlayButton>();
             WelcomeScreen.RegisterButton<WelcomeUpdateButton>();
+            WelcomeScreen.RegisterButton<WelcomeExitButton>();
         }
 
         internal static void OnSceneUnload()
         {
             LayerUtils.Initialize();
             JsonAssetUtils.LoadAssetsIntoAssetManager(Assets, Assembly.GetExecutingAssembly(), 
-                AssetUtils.GetFilesFromEmbeddedFolder(Assembly.GetExecutingAssembly(), "JsonAssets").ToArray());
+                AssetUtils.GetPathsFromEmbeddedStartingWith(Assembly.GetExecutingAssembly(), "JsonAssets").ToArray());
             VanillaAssets.AddFromResourcesNoClones<Sprite>();
             VanillaAssets.AddFromResourcesNoClones<SoundObject>();
         }

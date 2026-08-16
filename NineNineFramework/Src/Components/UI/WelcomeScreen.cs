@@ -40,6 +40,11 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         }
 
+        public virtual void PlayBackgroundAnimation()
+        {
+
+        }
+
         public virtual void Select()
         {
             if (selectAnimation != null) StopCoroutine(selectAnimation);
@@ -59,9 +64,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
             screen.audMan.PlaySingle(sound, volumeScale);
         }
 
-        public Image CreateImage(Sprite sprite)
+        public Image CreateImage(Sprite sprite, Transform parent = null)
         {
-            Image image = UIHelpers.CreateImage(sprite, maskImage.transform, Vector3.zero, false);
+            if (parent == null) parent = maskImage.transform;
+            Image image = UIHelpers.CreateImage(sprite, parent, Vector3.zero, false);
             image.name = "Image";
             image.rectTransform.SetCenterAnchor();
             return image;
@@ -109,6 +115,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
             PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("CampfireToss"), 2f);
             PlayAnimation();
+            PlayBackgroundAnimation();
 
             float speed = 3f;
             float value = 0f;
@@ -208,7 +215,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             animationPoint.SetCenterAnchor();
             animationPoint.localPosition = Vector3.right * 400f;
 
-            audMan = ObjectUtils.InitAudioManager(gameObject, distanceIndependent: true);
+            audMan = ObjectUtils.AddAudioManager(gameObject, distanceIndependent: true, subtitles: false);
         }
 
         internal void InitializeButtons(bool animated)
@@ -232,13 +239,13 @@ namespace BaldiPlusNineNineFramework.Components.UI
         {
             for (int i = 0; i < 3; i++)
             {
-                InitializeButton(registeredButtons[i]).transform.localScale = Vector3.one;
+                buttons[i].transform.localScale = Vector3.one;
             }
             animationPoint.localPosition = Vector3.zero;
             animationEnded = true;
         }
 
-        internal void PlayAnimations(float delay) => StartCoroutine(StartAnimations(delay));
+        internal void RevealButtons(float animationDelayTime) => StartCoroutine(StartAnimations(animationDelayTime));
 
         private void Update()
         {
