@@ -43,9 +43,9 @@ namespace BaldiPlusNineNineFramework
             Directory.CreateDirectory(CachePath);
             Directory.CreateDirectory(AudioCachePath);
 
-            WelcomeScreen.RegisterButton<WelcomePlayButton>();
-            WelcomeScreen.RegisterButton<WelcomeUpdateButton>();
-            WelcomeScreen.RegisterButton<WelcomeExitButton>();
+            WelcomeScreen.RegisterButtonOnInitialization<WelcomePlayButton>();
+            WelcomeScreen.RegisterButtonOnInitialization<WelcomeUpdateButton>();
+            WelcomeScreen.RegisterButtonOnInitialization<WelcomeExitButton>();
         }
 
         internal static void OnSceneUnload()

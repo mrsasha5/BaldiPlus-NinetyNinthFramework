@@ -59,7 +59,7 @@
     <Reference Include="MonoMod.Utils">
       <HintPath>..\Dependencies\MonoMod.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="MTM101BaldAPI">
+    <Reference Include="MTM101BaldAPI" Publicize="true">
       <HintPath>..\Dependencies\MTM101BaldAPI.dll</HintPath>
     </Reference>
     <Reference Include="NavMeshComponents">

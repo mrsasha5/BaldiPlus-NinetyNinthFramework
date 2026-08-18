@@ -8,16 +8,16 @@ using UnityEngine.UI;
 
 namespace BaldiPlusNineNineFramework.Components.UI
 {
-    public class WelcomePlayButton : WelcomeScreenButton
+    internal class WelcomePlayButton : WelcomeScreenButton
     {
         private Image[] images = new Image[5];
 
         private IEnumerator animator;
         private IEnumerator[] bgAnimators;
 
-        public override void Initialize()
+        public override void Initialize(object data)
         {
-            base.Initialize();
+            base.Initialize(data);
             priority = 128;
             CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Play")).name = "Background";
 
@@ -42,6 +42,12 @@ namespace BaldiPlusNineNineFramework.Components.UI
             playImage.rectTransform.localPosition = Vector3.up * -88f;
         }
 
+        protected override void OnPress()
+        {
+            base.OnPress();
+            WelcomeScreen.Instance.Close(immediately: false);
+        }
+
         public override void PlayAnimation()
         {
             base.PlayAnimation();
@@ -58,7 +64,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             if (bgAnimators == null)
             {
                 bgAnimators = new IEnumerator[4];
-                float[] time = new float[4] { 0f, 0.5f, 0.25f, 0.75f };
+                float[] time = new float[4] { 0f, 0.5f, 0.4f, 0.1f };
                 for (int i = 0; i < bgAnimators.Length; i++)
                 {
                     bgAnimators[i] = BackgroundAnimation(images[i + 1], time[i], i % 2 == 0);
@@ -142,7 +148,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         }
     }
 
-    public class WelcomeUpdateButton : WelcomeScreenButton
+    internal class WelcomeUpdateButton : WelcomeScreenButton
     {
         private Image arrowImage;
         private Image[] fileImages;
@@ -150,9 +156,9 @@ namespace BaldiPlusNineNineFramework.Components.UI
         private IEnumerator animator;
         private IEnumerator bgAnimator;
 
-        public override void Initialize()
+        public override void Initialize(object data)
         {
-            base.Initialize();
+            base.Initialize(data);
             priority = 64;
             CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Updates")).name = "Background";
             fileImages = new Image[3];
@@ -259,7 +265,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         }
     }
 
-    public class WelcomeExitButton : WelcomeScreenButton
+    internal class WelcomeExitButton : WelcomeScreenButton
     {
         private Image firstPrizeImage;
         private Image doorImage;
@@ -267,9 +273,9 @@ namespace BaldiPlusNineNineFramework.Components.UI
         private IEnumerator bgAnimator;
         private AudioManager audMan;
 
-        public override void Initialize()
+        public override void Initialize(object data)
         {
-            base.Initialize();
+            base.Initialize(data);
             CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit")).name = "Background";
 
             doorImage = CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit_Door_2"));
@@ -296,6 +302,12 @@ namespace BaldiPlusNineNineFramework.Components.UI
             exitSign.rectTransform.localPosition = Vector3.up * 89f;
 
             audMan = ObjectUtils.AddAudioManager(gameObject, true, AudioManagerSources.Sfx, false);
+        }
+
+        protected override void OnPress()
+        {
+            base.OnPress();
+            Application.Quit();
         }
 
         public override void PlayAnimation()
@@ -357,6 +369,125 @@ namespace BaldiPlusNineNineFramework.Components.UI
             firstPrizeImage.rectTransform.localPosition = startPos;
             firstPrizeImage.rectTransform.localScale = startScale;
             animator = null;
+        }
+    }
+
+    public class WelcomePollButton : WelcomeScreenButton
+    {
+        private Image balloonImage;
+        private Image urlImage;
+        private IEnumerator animator;
+        private IEnumerator bgAnimator;
+        private AudioManager audMan;
+        private string url;
+
+        public override void Initialize(object data)
+        {
+            base.Initialize(data);
+            url = (string)data;
+            priority = 96;
+            CreateImage(NineNineCore.Assets.Get<Sprite>("WelcomeMenu_PollButton")).name = "Background";
+
+            balloonImage = CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("QuestionMarkBalloon"));
+            balloonImage.name = "Balloon";
+            balloonImage.rectTransform.localPosition = new Vector3(-6f, -23f, 0f);
+            balloonImage.rectTransform.localScale = Vector3.zero;
+
+            TextMeshProUGUI descText = UIHelpers.CreateText<TextMeshProUGUI>(BaldiFonts.ComicSans12, 
+                "Take the survey", maskImage.transform, 
+                    Vector3.zero, false);
+            descText.rectTransform.SetCenterAnchor();
+            descText.alignment = TextAlignmentOptions.Center;
+            descText.rectTransform.localPosition = Vector3.up * -87f;
+
+            urlImage = CreateImage(NineNineCore.Assets.Get<Sprite>("PageRedirectIcon"));
+            urlImage.name = "PageRedirect";
+            urlImage.rectTransform.localPosition = new Vector3(45f, 105f, 0f);
+            urlImage.color = Color.yellow;
+
+            audMan = ObjectUtils.AddAudioManager(gameObject, true, AudioManagerSources.Vfx, false);
+        }
+
+        protected override void OnPress()
+        {
+            base.OnPress();
+            Application.OpenURL(url);
+        }
+
+        public override void InitializeStaticVersion()
+        {
+            base.InitializeStaticVersion();
+            balloonImage.rectTransform.localScale = Vector3.one;
+        }
+
+        public override void PlayAnimation()
+        {
+            base.PlayAnimation();
+            if (animator == null)
+            {
+                animator = MainAnimation();
+                StartCoroutine(animator);
+            }
+        }
+
+        public override void PlayBackgroundAnimation()
+        {
+            base.PlayBackgroundAnimation();
+            if (bgAnimator == null)
+            {
+                bgAnimator = BackgroundAnimation();
+                StartCoroutine(bgAnimator);
+            }
+        }
+
+        private IEnumerator MainAnimation()
+        {
+            float duration = 0.5f;
+
+            audMan.PlaySingle(NineNineCore.VanillaAssets.Get<SoundObject>("MatchBalloon_Revealed"));
+            Vector3 scale = new Vector3(1f, 0f, 1f);
+            while (scale.y < 1f)
+            {
+                scale.y += Time.unscaledDeltaTime / duration;
+                if (scale.y > 1f) scale.y = 1f;
+                balloonImage.rectTransform.localScale = scale;
+                yield return null;
+            }
+
+            animator = null;
+        }
+
+        private IEnumerator BackgroundAnimation()
+        {
+            Vector3 mainPos = balloonImage.rectTransform.localPosition;
+            float maxValue = 10f;
+            float startValue = 0f;
+            float duration = 2f;
+
+            float time = 0f;
+            bool state = true;
+            float value = 0f;
+            float targetValue = state ? maxValue : -maxValue;
+
+            while (true)
+            {
+                time += Time.unscaledDeltaTime / duration;
+                float smoothStep = Mathf.SmoothStep(0f, 1f, time);
+                value = Mathf.Lerp(startValue, targetValue, smoothStep);
+                balloonImage.rectTransform.localPosition = mainPos + Vector3.up * value;
+
+                if (time >= 1f)
+                {
+                    value = targetValue;
+                    state = !state;
+
+                    time = 0f;
+                    startValue = value;
+                    targetValue = state ? maxValue : -maxValue;
+                }
+
+                yield return null;
+            }
         }
     }
 }
