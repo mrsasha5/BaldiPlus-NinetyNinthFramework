@@ -14,6 +14,17 @@ namespace BaldiPlusNineNineFramework.Utilities
 
     public class ObjectUtils
     {
+        public static T CreateSingleton<T>() where T : Singleton<T>
+        {
+            GameObject singletonObject = new GameObject(typeof(T).Name);
+            GameObject.DontDestroyOnLoad(singletonObject);
+            singletonObject.SetActive(false); // Prevent Awake() from being invoked before initialized correctly
+            T component = singletonObject.AddComponent<T>();
+            Singleton<T>.m_Instance = component;
+            singletonObject.SetActive(true);
+            return component;
+        }
+
         public static AudioManager CreateAudioManager(bool distanceIndependent, AudioManagerSources sources = AudioManagerSources.Sfx, 
             bool subtitles = true, Color? subtitleColor = null)
         {

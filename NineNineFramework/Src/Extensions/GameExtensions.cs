@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BaldiPlusNineNineFramework.Extensions
+﻿namespace BaldiPlusNineNineFramework.Extensions
 {
-    internal class GameExtensions
+    public static class GameExtensions
     {
+        public static void PlaySoundEffect(this MusicManager instance, SoundObject sound, float volumeScale)
+        {
+            instance.soundSource.PlaySingle(sound, volumeScale);
+        }
     }
 }

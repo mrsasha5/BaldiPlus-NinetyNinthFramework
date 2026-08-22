@@ -125,7 +125,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
                     yield return null;
                 }
 
-                PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("BAL_Slap"));
+                MusicManager.Instance.PlaySoundEffect(NineNineCore.VanillaAssets.Get<SoundObject>("BAL_Slap"));
                 images[0].sprite = sprites[0];
                 time = 0.1f;
                 while (time > 0f)
@@ -249,7 +249,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private IEnumerator MainAnimation()
         {
-            PlaySingleSound(NineNineCore.Assets.Get<SoundObject>("Mechanism"));
+            MusicManager.Instance.PlaySoundEffect(NineNineCore.Assets.Get<SoundObject>("Mechanism"));
             float maxAngle = 720f;
             float speed = 360f;
             float value = 0f;
@@ -364,7 +364,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
             audMan.FlushQueue(true);
             doorImage.sprite = NineNineCore.Assets.Get<Sprite>("WelcomeMenu_Exit_Door_1");
-            PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("Doors_StandardShut"));
+            MusicManager.Instance.PlaySoundEffect(NineNineCore.VanillaAssets.Get<SoundObject>("Doors_StandardShut"));
 
             firstPrizeImage.rectTransform.localPosition = startPos;
             firstPrizeImage.rectTransform.localScale = startScale;
@@ -442,7 +442,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private IEnumerator MainAnimation()
         {
-            float duration = 0.5f;
+            float duration = 0.75f;
 
             audMan.PlaySingle(NineNineCore.VanillaAssets.Get<SoundObject>("MatchBalloon_Revealed"));
             Vector3 scale = new Vector3(1f, 0f, 1f);

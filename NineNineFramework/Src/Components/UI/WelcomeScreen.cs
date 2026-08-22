@@ -93,11 +93,6 @@ namespace BaldiPlusNineNineFramework.Components.UI
             }
         }
 
-        public void PlaySingleSound(SoundObject sound, float volumeScale = 1f)
-        {
-            screen.audMan.PlaySingle(sound, volumeScale);
-        }
-
         public Image CreateImage(Sprite sprite, Transform parent = null)
         {
             if (parent == null) parent = maskImage.transform;
@@ -141,7 +136,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private IEnumerator PressAnimation()
         {
-            PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("NotebookCollect"));
+            MusicManager.Instance.PlaySoundEffect(NineNineCore.VanillaAssets.Get<SoundObject>("NotebookCollect"));
             float speed = 2f;
             float value = 1f;
             while (value > 0.8f)
@@ -172,7 +167,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
                 yield return null;
             }
 
-            PlaySingleSound(NineNineCore.VanillaAssets.Get<SoundObject>("CampfireToss"), 2f);
+            MusicManager.Instance.PlaySoundEffect(NineNineCore.VanillaAssets.Get<SoundObject>("CampfireToss"), 2f);
             PlayAnimation();
             PlayBackgroundAnimation();
 
@@ -402,7 +397,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
             if (!immediately)
             {
-                StartCoroutine(CloseAnimation());
+                GlobalCam.Instance.StartCoroutine(CloseAnimation());
             }
             else
             {
@@ -415,24 +410,15 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private IEnumerator CloseAnimation()
         {
-            Image transitionImage = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>("WhitePixel"), parentImage.rectTransform,
-                Vector3.zero, false);
-            transitionImage.name = "NinetyNinthFramework_WelcomeBack";
-            transitionImage.rectTransform.SetCenterAnchor();
-            transitionImage.rectTransform.sizeDelta = new Vector3(480f, 360f);
+            GlobalCam.Instance.Transition(UiTransition.Dither, 0.01666667f);
+            parentImage.gameObject.SetActive(false);
 
-            Color color = transitionImage.color = new Color(1f, 1f, 1f, 0f);
-            while (color.a < 1f)
+            while (GlobalCam.Instance.TransitionActive)
             {
-                color.a += Time.unscaledDeltaTime;
-                if (color.a > 1f) color.a = 1f;
-                transitionImage.color = color;
                 yield return null;
             }
-            canvas.referencePixelsPerUnit = oldRefPixelsPerUnit;
-            Destroy(gameObject);
-            modLoadingManager.Start();
-            onScreenDestroy?.Invoke();
+
+            Close(immediately: true);
         }
 
         private WelcomeScreenButton InitializeButton(Type type, object data)

@@ -21,7 +21,6 @@ namespace BaldiPlusNineNineFramework
         public const string GUID = "mrsasha5.baldiplus.ninetyninthframework";
         public const string NAME = "Ninety-Ninth Framework";
         public const string VERSION = "0.1.0.0";
-
         private const string CACHE_FOLDER = "Cache";
 
         internal static string CachePath { get; private set; } = Path.Combine(Application.persistentDataPath, GUID, CACHE_FOLDER);
@@ -39,22 +38,15 @@ namespace BaldiPlusNineNineFramework
             ConfigManager.Initialize();
             LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(AssetLoader()), LoadingEventOrder.Start);
 
-            Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, GUID));
-            Directory.CreateDirectory(CachePath);
-            Directory.CreateDirectory(AudioCachePath);
-
-            WelcomeScreen.RegisterButtonOnInitialization<WelcomePlayButton>();
-            WelcomeScreen.RegisterButtonOnInitialization<WelcomeUpdateButton>();
-            WelcomeScreen.RegisterButtonOnInitialization<WelcomeExitButton>();
+            ContentFactory.InitializeMainPaths();
+            ContentFactory.RegisterWelcomeButtons();
+            Registers.OnSingletonsInstantiated += ContentFactory.InitializeSingletons;
         }
 
         internal static void OnSceneUnload()
         {
             LayerUtils.Initialize();
-            JsonAssetUtils.LoadAssetsIntoAssetManager(Assets, Assembly.GetExecutingAssembly(), 
-                AssetUtils.GetPathsFromEmbeddedStartingWith(Assembly.GetExecutingAssembly(), "JsonAssets").ToArray());
-            VanillaAssets.AddFromResourcesNoClones<Sprite>();
-            VanillaAssets.AddFromResourcesNoClones<SoundObject>();
+            ContentFactory.InitializeAssets();
         }
 
         private IEnumerator AssetLoader()
