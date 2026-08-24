@@ -195,7 +195,7 @@ namespace BaldiPlusNineNineFramework.Utilities
     {
         private static int audioCounter = 0;
 
-        public static List<string> GetPathsFromEmbeddedStartingWith(Assembly assembly, string path)
+        public static List<string> GetEmbeddedStartingWith(Assembly assembly, string path)
         {
             List<string> paths = new List<string>();
             string[] resourceNames = assembly.GetManifestResourceNames();

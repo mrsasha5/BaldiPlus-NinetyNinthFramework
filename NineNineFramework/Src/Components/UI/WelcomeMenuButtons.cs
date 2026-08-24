@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BaldiPlusNineNineFramework.Components.UI
 {
-    internal class WelcomePlayButton : WelcomeScreenButton
+    internal class WelcomePlayButton : WelcomeMenuButton
     {
         private Image[] images = new Image[5];
 
@@ -45,7 +45,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         protected override void OnPress()
         {
             base.OnPress();
-            WelcomeScreen.Instance.Close(immediately: false);
+            WelcomeMenu.Instance.Close(immediately: false);
         }
 
         public override void PlayAnimation()
@@ -148,7 +148,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         }
     }
 
-    internal class WelcomeUpdateButton : WelcomeScreenButton
+    internal class WelcomeUpdateButton : WelcomeMenuButton
     {
         private Image arrowImage;
         private Image[] fileImages;
@@ -265,7 +265,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         }
     }
 
-    internal class WelcomeExitButton : WelcomeScreenButton
+    internal class WelcomeExitButton : WelcomeMenuButton
     {
         private Image firstPrizeImage;
         private Image doorImage;
@@ -372,7 +372,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         }
     }
 
-    public class WelcomePollButton : WelcomeScreenButton
+    public class WelcomePollButton : WelcomeMenuButton
     {
         private Image balloonImage;
         private Image urlImage;

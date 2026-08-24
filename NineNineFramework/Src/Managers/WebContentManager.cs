@@ -8,7 +8,7 @@ namespace BaldiPlusNineNineFramework.Managers
     {
         public static void LoadWelcomeMenuPollButton()
         {
-            WelcomeScreen.Instance.StartCoroutine(WelcomePollButtonLoader());
+            WelcomeMenu.Instance.StartCoroutine(WelcomePollButtonLoader());
         }
 
         private static IEnumerator WelcomePollButtonLoader()

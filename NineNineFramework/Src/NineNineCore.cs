@@ -29,6 +29,7 @@ namespace BaldiPlusNineNineFramework
         internal static AssetManager VanillaAssets { get; private set; } = new AssetManager();
         internal static AssetManager Assets { get; private set; } = new AssetManager();
         internal static NineNineCore Instance { get; private set; }
+        internal static bool CoreInitialized { get; private set; }
 
         private void Awake()
         {
@@ -47,6 +48,8 @@ namespace BaldiPlusNineNineFramework
         {
             LayerUtils.Initialize();
             ContentFactory.InitializeAssets();
+            ContentFactory.InitializePrefabs();
+            CoreInitialized = true;
         }
 
         private IEnumerator AssetLoader()

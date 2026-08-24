@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace BaldiPlusNineNineFramework.Components.UI
 {
-    public class WelcomeScreenButton : MonoBehaviour
+    public class WelcomeMenuButton : MonoBehaviour
     {
         private IEnumerator selectAnimation;
         private bool pressAnimation;
@@ -20,7 +20,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         internal Vector2 size;
 
         // References to everything
-        public WelcomeScreen screen;
+        public WelcomeMenu screen;
         public Image mainImage;
         public Image maskImage;
 
@@ -207,7 +207,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         }
     }
 
-    public class WelcomeScreen : MonoBehaviour
+    public class WelcomeMenu : MonoBehaviour
     {
         private Vector3 startPosition = new Vector3(-150f, -25f, 0f);
         private Vector3 offset = new Vector3(150f, 0, 0f);
@@ -220,7 +220,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private float oldRefPixelsPerUnit;
 
-        private List<WelcomeScreenButton> buttons = new List<WelcomeScreenButton>();
+        private List<WelcomeMenuButton> buttons = new List<WelcomeMenuButton>();
 
         private RectTransform animationPoint;
 
@@ -240,14 +240,14 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private static List<Type> registeredButtons = new List<Type>();
         private static List<object> registeredButtonData = new List<object>();
-        public static WelcomeScreen Instance { get; private set; }
+        public static WelcomeMenu Instance { get; private set; }
 
-        public static void RegisterButtonOnInitialization<T>(object data = null) where T : WelcomeScreenButton 
+        public static void RegisterButtonOnInitialization<T>(object data = null) where T : WelcomeMenuButton 
             => RegisterButtonOnInitialization(typeof(T), data);
         public static void RegisterButtonOnInitialization(Type type, object data = null)
         {
             Type baseType = type.BaseType;
-            while (baseType != typeof(WelcomeScreenButton))
+            while (baseType != typeof(WelcomeMenuButton))
             {
                 baseType = baseType.BaseType;
                 if (baseType == null) 
@@ -257,18 +257,18 @@ namespace BaldiPlusNineNineFramework.Components.UI
             registeredButtonData.Add(data);
         }
 
-        public static void CreateButtonDynamically<T>(object data = null) where T : WelcomeScreenButton
+        public static void CreateButtonDynamically<T>(object data = null) where T : WelcomeMenuButton
         {
             if (Instance == null) throw new NullReferenceException("The Welcome Screen is not instantiated.");
             Instance.StartCoroutine(ButtonCreator<T>(data));
         }
 
-        private static IEnumerator ButtonCreator<T>(object data = null) where T : WelcomeScreenButton
+        private static IEnumerator ButtonCreator<T>(object data = null) where T : WelcomeMenuButton
         {
             while (Instance.SwitchingButton || !Instance.animationEnded) yield return null;
-            WelcomeScreenButton selectedButton = Instance.buttons[Instance.selectedButton];
+            WelcomeMenuButton selectedButton = Instance.buttons[Instance.selectedButton];
 
-            WelcomeScreenButton button = Instance.InitializeButton(typeof(T), data);
+            WelcomeMenuButton button = Instance.InitializeButton(typeof(T), data);
             Instance.UpdateButtonPositions();
 
             if (ConfigManager.welcomeMenuAnimations.Value) button.PlayAppearAnimation(0f);
@@ -310,7 +310,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         {
             for (int i = 0; i < registeredButtons.Count; i++)
             {
-                WelcomeScreenButton button = InitializeButton(registeredButtons[i], registeredButtonData[i]);
+                WelcomeMenuButton button = InitializeButton(registeredButtons[i], registeredButtonData[i]);
                 if (i <= 2) button.transform.localScale = Vector3.zero;
             }
             UpdateButtonPositions();
@@ -421,7 +421,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             Close(immediately: true);
         }
 
-        private WelcomeScreenButton InitializeButton(Type type, object data)
+        private WelcomeMenuButton InitializeButton(Type type, object data)
         {
             Image bordersImage = UIHelpers.CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("TooltipBG"), animationPoint,
                 Vector3.zero, false);
@@ -436,7 +436,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             maskImage.rectTransform.SetCenterAnchor();
             maskImage.gameObject.AddComponent<Mask>();
 
-            WelcomeScreenButton button = (WelcomeScreenButton)bordersImage.gameObject.AddComponent(type);
+            WelcomeMenuButton button = (WelcomeMenuButton)bordersImage.gameObject.AddComponent(type);
             button.size = bordersImage.rectTransform.sizeDelta;
             button.screen = this;
             button.mainImage = bordersImage;

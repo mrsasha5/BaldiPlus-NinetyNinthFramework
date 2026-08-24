@@ -42,7 +42,7 @@ namespace BaldiPlusNineNineFramework.Patches
             mainImage.rectTransform.sizeDelta = new Vector3(480f, 360f);
             mainImage.gameObject.AddComponent<Mask>();
 
-            WelcomeScreen screen = mainImage.gameObject.AddComponent<WelcomeScreen>();
+            WelcomeMenu screen = mainImage.gameObject.AddComponent<WelcomeMenu>();
             screen.Initialize(loadingScreen, mainImage);
             screen.InitializeButtons(true);
             if (ConfigManager.welcomeMenuAnimations.Value) screen.RevealButtons(animationDelayTime: 0.75f);
