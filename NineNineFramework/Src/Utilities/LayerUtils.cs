@@ -20,7 +20,7 @@ namespace BaldiPlusNineNineFramework.Utilities
         public static LayerMask ClickableCollidableEntities { get; private set; }
         public static LayerMask NoInterCollisionEntities { get; private set; }
         public static LayerMask Billboard { get; private set; }
-        public static LayerMask Ui { get; private set; }
+        public static LayerMask UI { get; private set; }
         public static LayerMask TakenBalloonLayer { get; private set; }
         public static LayerMask GumCollisionMask { get; private set; }
         public static LayerMask EntityCollisionMask { get; private set; }
@@ -36,7 +36,7 @@ namespace BaldiPlusNineNineFramework.Utilities
             IgnoreRaycast = LayerFromName("Ignore Raycast");
             IgnoreRaycastB = LayerFromName("Ignore Raycast B");
             Billboard = LayerFromName("Billboard");
-            Ui = LayerFromName("UI");
+            UI = LayerFromName("UI");
             Npcs = LayerFromName("NPCs");
             Player = LayerFromName("Player");
 #warning TODO: take values directly from prefabs

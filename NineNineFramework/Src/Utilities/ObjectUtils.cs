@@ -80,7 +80,7 @@ namespace BaldiPlusNineNineFramework.Utilities
         /// </summary>
         public static Canvas CreateCanvas(GameObject obj, bool setGlobalCam, float planeDistance = 0.31f)
         {
-            obj.layer = LayerUtils.Ui;
+            obj.layer = LayerUtils.UI;
             Canvas canvas = obj.AddComponent<Canvas>();
             CanvasScaler canvasScaler = obj.AddComponent<CanvasScaler>();
             obj.AddComponent<GraphicRaycaster>();

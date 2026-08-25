@@ -16,8 +16,6 @@ namespace BaldiPlusNineNineFramework.Patches
 
         private static void SwitchMenu()
         {
-            GlobalCam.Instance.Transition(UiTransition.Dither, 0.01666667f);
-
             mainMenu.gameObject.SetActive(!mainMenu.gameObject.activeSelf);
             achievementsMenu.gameObject.SetActive(!mainMenu.gameObject.activeSelf);
         }
@@ -37,6 +35,7 @@ namespace BaldiPlusNineNineFramework.Patches
             buttonImage.transform.localPosition = new Vector3(-150f, -60f, 0f);
             StandardMenuButton button = buttonImage.gameObject.ConvertToButton<StandardMenuButton>();
             button.swapOnHigh = true;
+            button.EnableTransition();
             button.highlightedSprite = NineNineCore.Assets.Get<Sprite>("EvenMoreTerriblePlaceholder");
             button.unhighlightedSprite = NineNineCore.Assets.Get<Sprite>("TerriblePlaceholder");
             button.transform.SetSiblingIndex(CursorController.instance.transform.GetSiblingIndex() - 1);

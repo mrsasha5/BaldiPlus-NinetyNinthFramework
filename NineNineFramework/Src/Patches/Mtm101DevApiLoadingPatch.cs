@@ -1,6 +1,7 @@
 ﻿using BaldiPlusNineNineFramework.Components.UI;
 using BaldiPlusNineNineFramework.Extensions;
 using BaldiPlusNineNineFramework.Managers;
+using BaldiPlusNineNineFramework.Utilities;
 using HarmonyLib;
 using MTM101BaldAPI;
 using MTM101BaldAPI.UI;
@@ -35,12 +36,12 @@ namespace BaldiPlusNineNineFramework.Patches
         {
             loadingScreen.name = "ModLoadingScreen";
 
-            Image mainImage = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>("WhitePixel"), loadingScreen.transform, 
-                Vector3.zero, false);
-            mainImage.name = "WelcomeBackScreen";
+            Image mainImage = new GameObject("WelcomeBackScreen").AddComponent<Image>();
+            mainImage.gameObject.layer = LayerUtils.UI;
+            mainImage.rectTransform.SetParent(loadingScreen.transform, false);
             mainImage.rectTransform.SetCenterAnchor();
             mainImage.rectTransform.sizeDelta = new Vector3(480f, 360f);
-            mainImage.gameObject.AddComponent<Mask>();
+            mainImage.gameObject.AddComponent<Mask>().showMaskGraphic = false;
 
             WelcomeMenu screen = mainImage.gameObject.AddComponent<WelcomeMenu>();
             screen.Initialize(loadingScreen, mainImage);

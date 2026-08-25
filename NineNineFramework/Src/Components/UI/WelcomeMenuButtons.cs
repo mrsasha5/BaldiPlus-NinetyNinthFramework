@@ -286,8 +286,9 @@ namespace BaldiPlusNineNineFramework.Components.UI
             arrow.name = "Arrow";
             arrow.rectTransform.localPosition = new Vector3(-15f, -13f, 0f);
 
-            Image prizeMask = CreateImage(NineNineCore.Assets.Get<Sprite>("WhitePixel"));
-            prizeMask.name = "FirstPrizeMask";
+            Image prizeMask = new GameObject("FirstPrizeMask").AddComponent<Image>();
+            prizeMask.gameObject.layer = LayerUtils.UI;
+            prizeMask.rectTransform.SetParent(maskImage.transform, false);
             prizeMask.rectTransform.localPosition = new Vector3(-18f, -113f, 0f);
             prizeMask.rectTransform.sizeDelta = new Vector2(150f, 300f);
             prizeMask.gameObject.AddComponent<Mask>().showMaskGraphic = false;
