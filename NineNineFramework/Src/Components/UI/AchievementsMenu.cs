@@ -20,6 +20,9 @@ namespace BaldiPlusNineNineFramework.Components.UI
         [SerializeField]
         private RectTransform contentRect;
 
+        [SerializeField]
+        private TooltipController tooltip;
+
         private List<Image> iconImages = new List<Image>();
 
         public StandardMenuButton exitButton;
@@ -40,6 +43,8 @@ namespace BaldiPlusNineNineFramework.Components.UI
             AchievementsMenu component = canvas.gameObject.AddComponent<AchievementsMenu>();
             component.canvas = canvas;
 
+            component.tooltip = canvas.gameObject.AddComponent<TooltipController>();
+            //component.tooltip.tooltipBgRect = NineNineCore.VanillaAssets.Get<GameObject>("");
             // Initializing elements
             Image background = new GameObject("Background").AddComponent<Image>();
             background.gameObject.layer = LayerUtils.UI;
@@ -52,26 +57,20 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.scrollAreaImage.rectTransform.SetParent(canvas.transform, false);
             component.scrollAreaImage.rectTransform.SetCenterAnchor();
             component.scrollAreaImage.rectTransform.localPosition = Vector3.up * -22f;
-            component.scrollAreaImage.rectTransform.sizeDelta = new Vector2(400f, 316f);
+            component.scrollAreaImage.rectTransform.sizeDelta = new Vector2(384f, 304f);
             component.scrollAreaImage.gameObject.AddComponent<Mask>();
             component.contentRect = new GameObject("Content", typeof(RectTransform)).GetComponent<RectTransform>();
             component.contentRect.gameObject.layer = LayerUtils.UI;
             component.contentRect.SetParent(component.scrollAreaImage.transform, false);
             component.contentRect.SetCenterAnchor();
-            // Own slider
-            Image scroller = new GameObject("Scroller").AddComponent<Image>();
-            scroller.gameObject.layer = LayerUtils.UI;
-            scroller.rectTransform.SetParent(canvas.transform, false);
-            scroller.rectTransform.SetCenterAnchor();
-            scroller.rectTransform.localPosition = new Vector3(220f, -22f, 0f);
-            scroller.rectTransform.sizeDelta = new Vector2(30f, 304f);
-            scroller.color = Color.black;
-            Image scrollButton = new GameObject("Button").AddComponent<Image>();
-            scrollButton.gameObject.layer = LayerUtils.UI;
-            scrollButton.rectTransform.SetParent(scroller.transform, false);
-            scrollButton.rectTransform.SetCenterAnchor();
-            scrollButton.rectTransform.sizeDelta = new Vector2(24f, 50f);
-            scrollButton.color = Color.gray;
+            // Own scroll bar
+            ScrollBar scrollBar = ScrollBar.Create(new Vector2(30f, 304f));
+            ((RectTransform)scrollBar.transform).SetCenterAnchor();
+            scrollBar.transform.SetParent(canvas.transform, false);
+            scrollBar.transform.localPosition = new Vector3(216f, -22f, 0f);
+            scrollBar.targetTransform = component.contentRect;
+            scrollBar.minValue = 0f;
+            scrollBar.maxValue = -800f;
 
             TextMeshProUGUI title =
                 UIHelpers.CreateText<TextMeshProUGUI>(BaldiFonts.ComicSans36, "Achievements", canvas.transform, Vector3.zero, false);
@@ -83,6 +82,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
             Image backArrow = UIHelpers.CreateImage(NineNineCore.VanillaAssets.Get<Sprite>("BackArrow_0"), canvas.transform, 
                 Vector3.zero, false);
+            backArrow.name = "BackButton";
             backArrow.rectTransform.SetCenterAnchor();
             backArrow.rectTransform.localPosition = new Vector3(-224f, 164f, 0f);
             component.exitButton = backArrow.gameObject.ConvertToButton<StandardMenuButton>();
