@@ -1,6 +1,6 @@
 ﻿namespace BaldiPlusNineNineFramework.Components.UI
 {
-    internal interface IStandardUIElement
+    public interface IStandardUIElement
     {
         void Lock(bool value);
         void Reset();

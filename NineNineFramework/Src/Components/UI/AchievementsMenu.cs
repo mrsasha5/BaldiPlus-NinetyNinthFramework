@@ -18,10 +18,16 @@ namespace BaldiPlusNineNineFramework.Components.UI
         private Image scrollAreaImage;
 
         [SerializeField]
+        private ScrollBar scrollBar;
+
+        [SerializeField]
         private RectTransform contentRect;
 
         [SerializeField]
         private TooltipController tooltip;
+
+        [SerializeField]
+        private float startScrollValue;
 
         private List<Image> iconImages = new List<Image>();
 
@@ -42,6 +48,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             UIHelpers.AddCursorInitiatorToCanvas(canvas);
             AchievementsMenu component = canvas.gameObject.AddComponent<AchievementsMenu>();
             component.canvas = canvas;
+            component.startScrollValue = -22f;
 
             component.tooltip = canvas.gameObject.AddComponent<TooltipController>();
             //component.tooltip.tooltipBgRect = NineNineCore.VanillaAssets.Get<GameObject>("");
@@ -64,13 +71,13 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.contentRect.SetParent(component.scrollAreaImage.transform, false);
             component.contentRect.SetCenterAnchor();
             // Own scroll bar
-            ScrollBar scrollBar = ScrollBar.Create(new Vector2(30f, 304f));
-            ((RectTransform)scrollBar.transform).SetCenterAnchor();
-            scrollBar.transform.SetParent(canvas.transform, false);
-            scrollBar.transform.localPosition = new Vector3(216f, -22f, 0f);
-            scrollBar.targetTransform = component.contentRect;
-            scrollBar.minValue = 0f;
-            scrollBar.maxValue = -800f;
+            component.scrollBar = ScrollBar.Create(new Vector2(30f, 304f));
+            ((RectTransform)component.scrollBar.transform).SetCenterAnchor();
+            component.scrollBar.transform.SetParent(canvas.transform, false);
+            component.scrollBar.transform.localPosition = new Vector3(216f, -22f, 0f);
+            component.scrollBar
+                .SetTargetTransform(component.contentRect)
+                .SetMinMaxValues(component.startScrollValue, component.startScrollValue);
 
             TextMeshProUGUI title =
                 UIHelpers.CreateText<TextMeshProUGUI>(BaldiFonts.ComicSans36, "Achievements", canvas.transform, Vector3.zero, false);
@@ -96,7 +103,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             prefab = component;
         }
 
-        private void OnEnable()
+        private void Awake()
         {
             Initialize();
         }
@@ -108,6 +115,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
                 CreateAchievement(null);
             }
             ComposeElements();
+            CalculateMinMaxScrollValues();
         }
 
         private void ComposeElements()
@@ -126,6 +134,14 @@ namespace BaldiPlusNineNineFramework.Components.UI
                     position.x = startPos.x;
                 }
                 else position += xOffset;
+            }
+        }
+
+        private void CalculateMinMaxScrollValues()
+        {
+            if (iconImages.Count > 40)
+            {
+                scrollBar.SetMinMaxValues(startScrollValue, startScrollValue + (iconImages.Count - 40) / 10f * 80f);
             }
         }
 

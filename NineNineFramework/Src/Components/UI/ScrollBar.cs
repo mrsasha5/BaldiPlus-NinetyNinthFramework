@@ -6,8 +6,19 @@ using UnityEngine.UI;
 
 namespace BaldiPlusNineNineFramework.Components.UI
 {
-    internal class ScrollBar : MonoBehaviour, IStandardUIElement
+    public class ScrollBar : MonoBehaviour, IStandardUIElement
     {
+        /// <summary>
+        /// Defines how to detect a mouse wheel calls.
+        /// Rewired is more preferred option.
+        /// </summary>
+        public enum InputMode
+        {
+            None,
+            UnityNative,
+            Rewired
+        }
+
         [SerializeField]
         private Image backgroundImage, scrollButtonImage;
 
@@ -15,19 +26,24 @@ namespace BaldiPlusNineNineFramework.Components.UI
         private StandardMenuButton scrollButton;
 
         [SerializeField]
-        private float padding;
+        private float padding, minValue, maxValue, buttonHeightPercent, mouseScrollSpeed;
 
         [SerializeField]
-        private float buttonHeightPercent = 0.16f;
+        private InputMode inputMode;
+
+        [SerializeField]
+        private Transform targetTransform;
+
+        [SerializeField]
+        private AnalogInputData itemAnalogData;
+
+        private Vector2 _absoluteVector;
+        private Vector2 _deltaVector;
+        private float scrollValue;
 
         private float value;
 
-        private bool trackCursor;
-
-        // The fields that are designed for public changes
-        public float maxValue = 0;
-        public float minValue = 0;
-        public Transform targetTransform;
+        private bool trackCursor, listenersInitialized, locked;
 
         public static ScrollBar Create(Vector2 size, float padding = 3f)
         {
@@ -36,7 +52,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
             Image bgImage = scrollBar.AddComponent<Image>();
 
-            Image scrollButtonImage = new GameObject("SliderButton").AddComponent<Image>();
+            Image scrollButtonImage = new GameObject("ScrollButton").AddComponent<Image>();
             scrollButtonImage.gameObject.layer = scrollBar.gameObject.layer;
             scrollButtonImage.rectTransform.SetParent(scrollBar.transform, false);
             scrollButtonImage.rectTransform.SetCenterAnchor();
@@ -47,15 +63,27 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.backgroundImage = bgImage;
             component.scrollButtonImage = scrollButtonImage;
             component.scrollButton = button;
-            component.SetSize(size, padding);
-            component.SetColors(Color.black, Color.gray);
+            component.itemAnalogData = new AnalogInputData();
+            component.itemAnalogData.xDeltaId = "ItemSelect";
+            component.itemAnalogData.yDeltaId = "ItemSelect";
+            component.itemAnalogData.steamDeltaId = "ItemAxis";
+            component.SetMouseScrollSpeed(0.25f);
+            component.SetButtonLengthPercent(0.16f);
+            component.SetWheelSupport(InputMode.Rewired);
+            component.SetBackgroundSize(size, padding);
+            component.SetBackgroundColor(Color.black);
+            component.SetButtonColor(Color.gray);
             return component;
         }
 
         private void Awake()
         {
-            scrollButton.OnPress.AddListener(OnPressScrollButton);
-            scrollButton.OnRelease.AddListener(OnReleaseScrollButton);
+            if (!listenersInitialized)
+            {
+                listenersInitialized = true;
+                scrollButton.OnPress.AddListener(OnPressScrollButton);
+                scrollButton.OnRelease.AddListener(OnReleaseScrollButton);
+            }   
         }
 
         private void OnPressScrollButton()
@@ -70,76 +98,202 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private void Update()
         {
+            if (locked) return;
+
+            // Handle the button
             if (trackCursor)
             {
                 if (CursorController.Instance.cursorTransform.position.y != scrollButtonImage.rectTransform.position.y)
                 {
-                    // Calculate the allowed range of Y coordinate
-                    float scrollButtonHalfLength = scrollButtonImage.rectTransform.sizeDelta.y / 2f;
-                    float startY = backgroundImage.rectTransform.sizeDelta.y / 2f - scrollButtonHalfLength - padding;
-                    float endY = -startY;
-
-                    // Set new button position
-                    Vector3 oldButtonLocalPos = scrollButtonImage.rectTransform.localPosition;
-                    Vector3 newButtonGlobalPos = backgroundImage.rectTransform.position;
-                    newButtonGlobalPos.y = CursorController.Instance.cursorTransform.position.y;
-                    scrollButtonImage.rectTransform.position = newButtonGlobalPos;
-
-                    // Revert changes if new position is incorrect
-                    // Or else update target position based on the new button position
-                    if (scrollButtonImage.rectTransform.localPosition.y > startY || 
-                        scrollButtonImage.rectTransform.localPosition.y < endY) 
-                        scrollButtonImage.rectTransform.localPosition = oldButtonLocalPos;
-                    else
-                    {
-                        value = minValue + (maxValue - minValue) * GetButtonPercent();
-                        Vector3 pos = targetTransform.position;
-                        pos.y = value;
-                        targetTransform.position = pos;
-                    }
+                    SetButtonPosition(CursorController.Instance.cursorTransform.position.y);
                 }
+            }
+            // Or check if player uses mouse wheel
+            else if (inputMode != InputMode.None)
+            {
+                InputManager.Instance.GetAnalogInput(itemAnalogData, out _absoluteVector, out _deltaVector, 0.05f);
+                if (Mathf.Sign(scrollValue) != Mathf.Sign(_deltaVector.x))
+                {
+                    scrollValue = 0f;
+                }
+
+                scrollValue += _deltaVector.x;
+                if (scrollValue != 0f)
+                    SetButtonPosition(scrollButton.transform.position.y - scrollValue * mouseScrollSpeed * Time.unscaledDeltaTime);
+                /*if (scrollValue > 0.25f || Singleton<InputManager>.Instance.GetDigitalInput("ItemRight", onDown: true))
+                {
+                    IncreaseItemSelection();
+                    scrollValue = 0f;
+                }
+                else if (scrollVal < -0.25f || Singleton<InputManager>.Instance.GetDigitalInput("ItemLeft", onDown: true))
+                {
+                    DecreaseItemSelection();
+                    scrollValue = 0f;
+                }*/
             }
         }
 
-        public void SetSize(Vector2 size, float padding = 3f)
+        private void SetButtonPosition(float yValue)
+        {
+            // Calculate the allowed range of Y-axis
+            float scrollButtonHalfLength = scrollButtonImage.rectTransform.sizeDelta.y / 2f;
+            float startY = backgroundImage.rectTransform.sizeDelta.y / 2f - scrollButtonHalfLength - padding;
+            float endY = -startY;
+
+            // Set new button position
+            Vector3 oldButtonLocalPos = scrollButtonImage.rectTransform.localPosition;
+            Vector3 newButtonGlobalPos = backgroundImage.rectTransform.position;
+            newButtonGlobalPos.y = yValue;
+            scrollButtonImage.rectTransform.position = newButtonGlobalPos;
+
+            // Revert changes if new position is incorrect
+            // Or else update target position based on the new button position
+            if (scrollButtonImage.rectTransform.localPosition.y > startY ||
+                scrollButtonImage.rectTransform.localPosition.y < endY)
+                scrollButtonImage.rectTransform.localPosition = oldButtonLocalPos;
+            else
+            {
+                UpdateScrollableElement();
+            }
+        }
+
+        private void UpdateScrollableElement()
+        {
+            value = minValue + (maxValue - minValue) * GetButtonPercent();
+            Vector3 pos = targetTransform.position;
+            pos.y = value;
+            targetTransform.position = pos;
+        }
+
+        public ScrollBar SetMouseScrollSpeed(float value)
+        {
+            mouseScrollSpeed = value;
+            return this;
+        }
+
+        public ScrollBar SetWheelSupport(InputMode mode)
+        {
+            inputMode = mode;
+            return this;
+        }
+
+        /// <summary>
+        /// Defines which transform to move. The value is serializable in Unity.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public ScrollBar SetTargetTransform(Transform value)
+        {
+            targetTransform = value;
+            UpdateButtonPosition(GetButtonPercent());
+            return this;
+        }
+
+        /// <summary>
+        /// Defines how the button's Y-axis of size is calculated by the component. The value is serializable in Unity.
+        /// </summary>
+        /// <returns></returns>
+        public ScrollBar SetButtonLengthPercent(float value)
+        {
+            buttonHeightPercent = value;
+            UpdateButtonPosition(GetButtonPercent());
+            return this;
+        }
+
+        /// <summary>
+        /// Defines min and max values of global Y-axis for scrollable transform.
+        /// </summary>
+        /// <param name="minValue"></param>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
+        public ScrollBar SetMinMaxValues(float minValue, float maxValue)
+        {
+            this.minValue = minValue;
+            this.maxValue = maxValue;
+            if (value < minValue) value = minValue;
+            else if (value > maxValue) value = maxValue;
+            UpdateButtonPosition(GetButtonPercent());
+            return this;
+        }
+
+        /// <summary>
+        /// Defines size of background image.
+        /// This method overload has a default padding value.
+        /// Updates button size as well.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public ScrollBar SetBackgroundSize(Vector2 size)
+        {
+            return SetBackgroundSize(size, 3f);
+        }
+
+        /// <summary>
+        /// Defines button padding and size of background image.
+        /// Updates button size as well.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="padding"></param>
+        /// <returns></returns>
+        public ScrollBar SetBackgroundSize(Vector2 size, float padding)
         {
             this.padding = padding;
             backgroundImage.rectTransform.sizeDelta = size;
             scrollButtonImage.rectTransform.sizeDelta = new Vector2(size.x - padding * 2f, size.y * buttonHeightPercent);
-            UpdateButtonPosition((value - minValue) / (maxValue - minValue));
+            UpdateButtonPosition(GetButtonPercent());
+            return this;
         }
 
-        public void SetColors(Color backgroundColor, Color sliderColor)
+        public ScrollBar SetBackgroundColor(Color color)
         {
-            backgroundImage.color = backgroundColor;
-            scrollButtonImage.color = sliderColor;
+            backgroundImage.color = color;
+            return this;
         }
 
-        private float GetButtonPercent()
+        public ScrollBar SetButtonColor(Color color)
         {
-            // Calculate the range of button position for Y axis
-            float range = backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y * 2f - padding * 2f;
-            float startPos = (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y) / 2f - padding;
-            return Mathf.Abs((startPos - scrollButtonImage.rectTransform.localPosition.y) / startPos * 2f);
+            scrollButtonImage.color = color;
+            return this;
         }
 
-        private void UpdateButtonPosition(float percent)
+        public ScrollBar SetBackgroundSprite(Sprite sprite)
         {
-            // Calculate start position on the first line
-            // Calculate offset on the second line
-            scrollButtonImage.rectTransform.localPosition = new Vector2(0f,
-                (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y) / 2f - padding -
-                (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y - padding * 2f) * percent);
+            backgroundImage.sprite = sprite;
+            return this;
+        }
+
+        public ScrollBar SetButtonSprite(Sprite sprite)
+        {
+            scrollButtonImage.sprite = sprite;
+            return this;
         }
 
         public void Reset()
         {
-
+            UpdateButtonPosition(0f);
+            UpdateScrollableElement();
         }
 
         public void Lock(bool value)
         {
+            locked = value;
+        }
 
+        private float GetButtonPercent()
+        {
+            float startPosition = (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y) / 2f - padding;
+            float range = startPosition * 2f;
+            if (range == 0f) return 0f;
+            return Mathf.Clamp((startPosition - scrollButtonImage.rectTransform.position.y) / range, 0f, 1f);
+        }
+
+        private void UpdateButtonPosition(float percent)
+        {
+            scrollButtonImage.rectTransform.localPosition = new Vector2(0f,
+                // Calculate start position
+                (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y) / 2f - padding -
+                // Calculate offset
+                (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y - padding * 2f) * percent);
         }
     }
 }
