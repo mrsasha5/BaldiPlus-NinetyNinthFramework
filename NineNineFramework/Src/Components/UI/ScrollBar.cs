@@ -1,6 +1,7 @@
 ﻿using BaldiPlusNineNineFramework.Extensions;
 using BaldiPlusNineNineFramework.Utilities;
 using MTM101BaldAPI.UI;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,7 +27,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         private StandardMenuButton scrollButton;
 
         [SerializeField]
-        private float padding, minValue, maxValue, buttonHeightPercent, mouseScrollSpeed;
+        private float padding, minValue, maxValue, buttonHeightPercent, mouseScrollSpeed, magnetThreshold;
 
         [SerializeField]
         private InputMode inputMode;
@@ -67,7 +68,8 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.itemAnalogData.xDeltaId = "ItemSelect";
             component.itemAnalogData.yDeltaId = "ItemSelect";
             component.itemAnalogData.steamDeltaId = "ItemAxis";
-            component.SetMouseScrollSpeed(0.25f);
+            component.SetMagnetThreshold(0.025f);
+            component.SetMouseScrollSpeed(100f);
             component.SetButtonLengthPercent(0.16f);
             component.SetWheelSupport(InputMode.Rewired);
             component.SetBackgroundSize(size, padding);
@@ -76,7 +78,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             return component;
         }
 
-        private void Awake()
+        private void Start()
         {
             if (!listenersInitialized)
             {
@@ -165,6 +167,12 @@ namespace BaldiPlusNineNineFramework.Components.UI
             targetTransform.position = pos;
         }
 
+        public ScrollBar SetMagnetThreshold(float value)
+        {
+            magnetThreshold = value;
+            return this;
+        }
+
         public ScrollBar SetMouseScrollSpeed(float value)
         {
             mouseScrollSpeed = value;
@@ -191,10 +199,12 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         /// <summary>
         /// Defines how the button's Y-axis of size is calculated by the component. The value is serializable in Unity.
+        /// Allowed range of the value is [0f; 1f]. This method throws an exception if argument is improperly defined.
         /// </summary>
         /// <returns></returns>
         public ScrollBar SetButtonLengthPercent(float value)
         {
+            if (value < 0f || value > 1f) new ArgumentOutOfRangeException("value", "allowed range is [0f; 1f]");
             buttonHeightPercent = value;
             UpdateButtonPosition(GetButtonPercent());
             return this;
@@ -284,7 +294,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
             float startPosition = (backgroundImage.rectTransform.sizeDelta.y - scrollButtonImage.rectTransform.sizeDelta.y) / 2f - padding;
             float range = startPosition * 2f;
             if (range == 0f) return 0f;
-            return Mathf.Clamp((startPosition - scrollButtonImage.rectTransform.position.y) / range, 0f, 1f);
+            float percent = Mathf.Clamp((startPosition - scrollButtonImage.rectTransform.localPosition.y) / range, 0f, 1f);
+            if (percent < 0.5f && percent < magnetThreshold) return 0f;
+            else if (percent >= 0.5f && percent > 1f - magnetThreshold) return 1f;
+            return percent;
         }
 
         private void UpdateButtonPosition(float percent)

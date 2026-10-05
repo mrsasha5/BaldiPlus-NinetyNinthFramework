@@ -1,0 +1,18 @@
+{
+  "assetType": "SoundObject",
+  "formatVersion": "1.0.0.0",
+  "name": null,
+  "soundType": "Effect",
+  "volumeMultiplier": 1,
+  "soundKey": null,
+  "encrypted": false,
+  "additionalKeys": [],
+  "subtitleDuration": 0,
+  "color": {
+    "r": 1,
+    "g": 1,
+    "b": 1,
+    "a": 1
+  },
+  "addToMemory": true
+}

@@ -38,6 +38,7 @@ namespace BaldiPlusNineNineFramework
             harmony.PatchAllConditionals();
             ConfigManager.Initialize();
             LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(AssetLoader()), LoadingEventOrder.Start);
+            //LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(MainLoader()), LoadingEventOrder.Pre);
 
             ContentFactory.InitializeMainPaths();
             ContentFactory.RegisterWelcomeButtons();
@@ -50,6 +51,12 @@ namespace BaldiPlusNineNineFramework
             ContentFactory.InitializeAssets();
             ContentFactory.InitializePrefabs();
             CoreInitialized = true;
+        }
+
+        private IEnumerator MainLoader()
+        {
+            yield return 1;
+            //yield return "";
         }
 
         private IEnumerator AssetLoader()

@@ -33,7 +33,6 @@ namespace BaldiPlusNineNineFramework.Managers
             NineNineCore.VanillaAssets.AddFromResourcesNoClones<SoundObject>();
             NineNineCore.VanillaAssets.AddFromResourcesNoClones<AudioClip>();
             NineNineCore.VanillaAssets.AddFromResourcesNoClones<Material>();
-            NineNineCore.VanillaAssets.AddFromResourcesNoClones<GameObject>();
         }
 
         public static void InitializeSingletons()

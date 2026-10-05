@@ -1,7 +1,9 @@
 ﻿using BaldiPlusNineNineFramework.Extensions;
 using BaldiPlusNineNineFramework.Utilities;
 using MTM101BaldAPI;
+using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.UI;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -50,8 +52,22 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.canvas = canvas;
             component.startScrollValue = -22f;
 
+            // Initializing tooltip and its controller
             component.tooltip = canvas.gameObject.AddComponent<TooltipController>();
-            //component.tooltip.tooltipBgRect = NineNineCore.VanillaAssets.Get<GameObject>("");
+            RectTransform tooltipPrefab = 
+                Array.Find(AssetFinder.FindAllOfTypeWithName<RectTransform>("TooltipBase", true), x => 
+                x.transform.parent.name == "Options" && x.transform.parent.parent.name == "PauseMenuScreens"
+                    && x.transform.parent.parent.parent.name == "CoreGameManager");
+            RectTransform tooltipInstance = GameObject.Instantiate(tooltipPrefab, component.transform, false);
+            tooltipInstance.SetCenterAnchor();
+            tooltipInstance.transform.localPosition = new Vector3(-240f, 180f, 0f);
+            component.tooltip.tooltipBgRect = tooltipInstance.GetComponentInChildren<Image>().rectTransform;
+            component.tooltip.tooltipTmp = tooltipInstance.GetComponentInChildren<TMP_Text>();
+            component.tooltip.tooltipRect = tooltipInstance.GetComponentsInChildren<RectTransform>()[1];
+            component.tooltip.xBuffer = 6;
+            component.tooltip.yBuffer = 8;
+            component.tooltip.xMax = 470f;
+            component.tooltip.xMin = 10f;
             // Initializing elements
             Image background = new GameObject("Background").AddComponent<Image>();
             background.gameObject.layer = LayerUtils.UI;
@@ -98,6 +114,8 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.exitButton.highlightedSprite = NineNineCore.VanillaAssets.Get<Sprite>("BackArrow_1");
             component.exitButton.unhighlightedSprite = NineNineCore.VanillaAssets.Get<Sprite>("BackArrow_0");
 
+            tooltipInstance.SetSiblingIndex(backArrow.transform.GetSiblingIndex());
+
             UIHelpers.AddBordersToCanvas(canvas);
 
             prefab = component;
@@ -110,7 +128,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private void Initialize()
         {
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 100; i++)
             {
                 CreateAchievement(null);
             }
@@ -145,6 +163,11 @@ namespace BaldiPlusNineNineFramework.Components.UI
             }
         }
 
+        private void OnButtonHighlight(string key)
+        {
+            tooltip.UpdateTooltip(key);
+        }
+
         private void CreateAchievement(Sprite iconSprite)
         {
             Image icon = UIHelpers.CreateImage(NineNineCore.Assets.Get<Sprite>("MissingAsset"), canvas.transform, Vector3.zero,
@@ -153,6 +176,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
             icon.rectTransform.SetCenterAnchor();
             icon.rectTransform.SetParent(contentRect);
             icon.rectTransform.SetSiblingIndex(CursorController.Instance.transform.GetSiblingIndex() - 1);
+            StandardMenuButton button = icon.gameObject.ConvertToButton<StandardMenuButton>();
+            button.eventOnHigh = true;
+            button.OnHighlight.AddListener(() => OnButtonHighlight("test"));
+            button.OffHighlight.AddListener(() => tooltip.CloseTooltip());
             iconImages.Add(icon);
         }
     }
