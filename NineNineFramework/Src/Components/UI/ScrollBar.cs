@@ -9,17 +9,6 @@ namespace BaldiPlusNineNineFramework.Components.UI
 {
     public class ScrollBar : MonoBehaviour, IStandardUIElement
     {
-        /// <summary>
-        /// Defines how to detect a mouse wheel calls.
-        /// Rewired is more preferred option.
-        /// </summary>
-        public enum InputMode
-        {
-            None,
-            UnityNative,
-            Rewired
-        }
-
         [SerializeField]
         private Image backgroundImage, scrollButtonImage;
 
@@ -30,7 +19,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
         private float padding, minValue, maxValue, buttonHeightPercent, mouseScrollSpeed, magnetThreshold;
 
         [SerializeField]
-        private InputMode inputMode;
+        private bool mouseWheelSupport, locked;
 
         [SerializeField]
         private Transform targetTransform;
@@ -40,11 +29,14 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private Vector2 _absoluteVector;
         private Vector2 _deltaVector;
-        private float scrollValue;
 
         private float value;
 
-        private bool trackCursor, listenersInitialized, locked;
+        private bool trackCursor, initialized;
+
+        public Image BackgroundImage => backgroundImage;
+
+        public Image ButtonImage => scrollButtonImage;
 
         public static ScrollBar Create(Vector2 size, float padding = 3f)
         {
@@ -68,10 +60,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
             component.itemAnalogData.xDeltaId = "ItemSelect";
             component.itemAnalogData.yDeltaId = "ItemSelect";
             component.itemAnalogData.steamDeltaId = "ItemAxis";
-            component.SetMagnetThreshold(0.025f);
-            component.SetMouseScrollSpeed(100f);
+            component.SetMagnetThreshold(0.01f);
+            component.SetMouseScrollSpeed(2000f);
             component.SetButtonLengthPercent(0.16f);
-            component.SetWheelSupport(InputMode.Rewired);
+            component.SetMouseWheelSupport(true);
             component.SetBackgroundSize(size, padding);
             component.SetBackgroundColor(Color.black);
             component.SetButtonColor(Color.gray);
@@ -80,9 +72,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         private void Start()
         {
-            if (!listenersInitialized)
+            if (!initialized)
             {
-                listenersInitialized = true;
+                Reset();
+                initialized = true;
                 scrollButton.OnPress.AddListener(OnPressScrollButton);
                 scrollButton.OnRelease.AddListener(OnReleaseScrollButton);
             }   
@@ -107,35 +100,18 @@ namespace BaldiPlusNineNineFramework.Components.UI
             {
                 if (CursorController.Instance.cursorTransform.position.y != scrollButtonImage.rectTransform.position.y)
                 {
-                    SetButtonPosition(CursorController.Instance.cursorTransform.position.y);
+                    SetButtonPosition(CursorController.Instance.cursorTransform.position.y, false);
                 }
             }
             // Or check if player uses mouse wheel
-            else if (inputMode != InputMode.None)
+            else if (mouseWheelSupport)
             {
                 InputManager.Instance.GetAnalogInput(itemAnalogData, out _absoluteVector, out _deltaVector, 0.05f);
-                if (Mathf.Sign(scrollValue) != Mathf.Sign(_deltaVector.x))
-                {
-                    scrollValue = 0f;
-                }
-
-                scrollValue += _deltaVector.x;
-                if (scrollValue != 0f)
-                    SetButtonPosition(scrollButton.transform.position.y - scrollValue * mouseScrollSpeed * Time.unscaledDeltaTime);
-                /*if (scrollValue > 0.25f || Singleton<InputManager>.Instance.GetDigitalInput("ItemRight", onDown: true))
-                {
-                    IncreaseItemSelection();
-                    scrollValue = 0f;
-                }
-                else if (scrollVal < -0.25f || Singleton<InputManager>.Instance.GetDigitalInput("ItemLeft", onDown: true))
-                {
-                    DecreaseItemSelection();
-                    scrollValue = 0f;
-                }*/
+                SetButtonPosition(scrollButton.transform.position.y - _deltaVector.x * mouseScrollSpeed * Time.unscaledDeltaTime, true);
             }
         }
 
-        private void SetButtonPosition(float yValue)
+        private void SetButtonPosition(float yValue, bool pushToEnd)
         {
             // Calculate the allowed range of Y-axis
             float scrollButtonHalfLength = scrollButtonImage.rectTransform.sizeDelta.y / 2f;
@@ -148,13 +124,21 @@ namespace BaldiPlusNineNineFramework.Components.UI
             newButtonGlobalPos.y = yValue;
             scrollButtonImage.rectTransform.position = newButtonGlobalPos;
 
-            // Revert changes if new position is incorrect
-            // Or else update target position based on the new button position
-            if (scrollButtonImage.rectTransform.localPosition.y > startY ||
-                scrollButtonImage.rectTransform.localPosition.y < endY)
-                scrollButtonImage.rectTransform.localPosition = oldButtonLocalPos;
+            // Revert position
+            // Or set start/end pos if parameter pushToEnd is true
+            if (scrollButtonImage.rectTransform.localPosition.y > startY)
+            {
+                if (pushToEnd) scrollButtonImage.rectTransform.localPosition = Vector3.up * startY;
+                else scrollButtonImage.rectTransform.localPosition = oldButtonLocalPos;
+            }
+            else if (scrollButtonImage.rectTransform.localPosition.y < endY)
+            {
+                if (pushToEnd) scrollButtonImage.rectTransform.localPosition = Vector3.up * endY;
+                else scrollButtonImage.rectTransform.localPosition = oldButtonLocalPos;
+            }
             else
             {
+                // Set new position if everything is fine
                 UpdateScrollableElement();
             }
         }
@@ -179,9 +163,9 @@ namespace BaldiPlusNineNineFramework.Components.UI
             return this;
         }
 
-        public ScrollBar SetWheelSupport(InputMode mode)
+        public ScrollBar SetMouseWheelSupport(bool value)
         {
-            inputMode = mode;
+            mouseWheelSupport = value;
             return this;
         }
 
@@ -193,20 +177,21 @@ namespace BaldiPlusNineNineFramework.Components.UI
         public ScrollBar SetTargetTransform(Transform value)
         {
             targetTransform = value;
-            UpdateButtonPosition(GetButtonPercent());
+            UpdateScrollableElement();
             return this;
         }
 
         /// <summary>
         /// Defines how the button's Y-axis of size is calculated by the component. The value is serializable in Unity.
-        /// Allowed range of the value is [0f; 1f]. This method throws an exception if argument is improperly defined.
+        /// Allowed range of the value is [0f; 1f). This method throws an exception if argument is improperly defined.
         /// </summary>
+        /// <param name="value"></param>
         /// <returns></returns>
         public ScrollBar SetButtonLengthPercent(float value)
         {
-            if (value < 0f || value > 1f) new ArgumentOutOfRangeException("value", "allowed range is [0f; 1f]");
+            if (value < 0f || value >= 1f) new ArgumentOutOfRangeException("value", "allowed range is [0f; 1f)");
             buttonHeightPercent = value;
-            UpdateButtonPosition(GetButtonPercent());
+            SetBackgroundSize(backgroundImage.rectTransform.sizeDelta, padding);
             return this;
         }
 
@@ -223,6 +208,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             if (value < minValue) value = minValue;
             else if (value > maxValue) value = maxValue;
             UpdateButtonPosition(GetButtonPercent());
+            UpdateScrollableElement();
             return this;
         }
 
@@ -248,9 +234,10 @@ namespace BaldiPlusNineNineFramework.Components.UI
         public ScrollBar SetBackgroundSize(Vector2 size, float padding)
         {
             this.padding = padding;
+            float percent = GetButtonPercent();
             backgroundImage.rectTransform.sizeDelta = size;
             scrollButtonImage.rectTransform.sizeDelta = new Vector2(size.x - padding * 2f, size.y * buttonHeightPercent);
-            UpdateButtonPosition(GetButtonPercent());
+            UpdateButtonPosition(percent);
             return this;
         }
 
