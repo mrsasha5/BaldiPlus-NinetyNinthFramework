@@ -1,6 +1,6 @@
 ﻿using BepInEx.Configuration;
 
-namespace BaldiPlusNineNineFramework.Managers
+namespace BaldiPlusNineNineFramework
 {
     internal class ConfigManager
     {

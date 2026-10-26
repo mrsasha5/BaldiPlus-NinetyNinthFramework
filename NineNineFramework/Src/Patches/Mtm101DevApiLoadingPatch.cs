@@ -1,6 +1,6 @@
 ﻿using BaldiPlusNineNineFramework.Components.UI;
 using BaldiPlusNineNineFramework.Extensions;
-using BaldiPlusNineNineFramework.Managers;
+using BaldiPlusNineNineFramework.Management;
 using BaldiPlusNineNineFramework.Utilities;
 using HarmonyLib;
 using MTM101BaldAPI;

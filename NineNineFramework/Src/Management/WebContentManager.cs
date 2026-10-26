@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace BaldiPlusNineNineFramework.Managers
+namespace BaldiPlusNineNineFramework.Management
 {
     internal class WebContentManager
     {

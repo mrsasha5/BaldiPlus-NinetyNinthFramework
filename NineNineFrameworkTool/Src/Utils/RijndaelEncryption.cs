@@ -90,7 +90,7 @@ namespace NineNineFrameworkTool.Utils
         private byte[] GetIV()
         {
             SecureRandom random = new SecureRandom();
-            byte[] iv = new byte[BlockSize / 8]; // bits to bytes
+            byte[] iv = new byte[BlockSize / 8]; // Bits to bytes
             random.NextBytes(iv);
 
             return iv;

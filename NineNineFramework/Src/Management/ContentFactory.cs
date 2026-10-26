@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 
-namespace BaldiPlusNineNineFramework.Managers
+namespace BaldiPlusNineNineFramework.Management
 {
     internal class ContentFactory
     {
@@ -37,12 +37,28 @@ namespace BaldiPlusNineNineFramework.Managers
 
         public static void InitializeSingletons()
         {
-            
+            ObjectUtils.CreateSingleton<AchievementsManager>();
+
+            Events.OnFileNameLoaded += AchievementsManager.Instance.OnFileNameLoaded;
+            Events.OnFileNameLoadFailed += AchievementsManager.Instance.OnFileNameLoadFailed;
         }
 
         public static void InitializePrefabs()
         {
             AchievementsMenu.InitializePrefab();
+        }
+
+        public static void InitializeAchievements()
+        {
+            AchievementInformation testAchievement = new AchievementInformation(NineNineCore.Instance.Info, id: "test_achievement")
+                .SetNameKey("Cool achievement") // You should use localization keys
+                .SetDescriptionKey("Isn't it?") // but for now I put here raw text since I don't want spend the time right now
+                .SetIcon(NineNineCore.VanillaAssets.Get<Sprite>("AlarmClockIcon_Large"))
+                .SetDefaultHiddenIcon()
+                .SetCategoryIdentifiers("items")
+                .SetGlobal(false)
+                .SetAdditionalData(new AchievementIntProgressData(minValue: 0, maxValue: 20))
+                .Register();
         }
     }
 }

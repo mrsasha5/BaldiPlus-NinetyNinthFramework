@@ -28,8 +28,8 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         public static void LoadAssetsIntoAssetManager(AssetManager assetManager, Assembly assembly, string[] paths)
         {
-            ExceptionUtils.ThrowIfArgumentNull(paths, "paths");
-            ExceptionUtils.ThrowIfArgumentNull(assetManager, "assetManager");
+            ThrowExceptionUtils.ArgumentNull(paths, "paths");
+            ThrowExceptionUtils.ArgumentNull(assetManager, "assetManager");
 
             for (int i = 0; i < paths.Length; i++)
             {
@@ -44,8 +44,8 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         public static IEnumerator LoadAssetsIntoAssetManagerEnumerator(AssetManager assetManager, Assembly assembly, string[] paths)
         {
-            ExceptionUtils.ThrowIfArgumentNull(paths, "paths");
-            ExceptionUtils.ThrowIfArgumentNull(assetManager, "assetManager");
+            ThrowExceptionUtils.ArgumentNull(paths, "paths");
+            ThrowExceptionUtils.ArgumentNull(assetManager, "assetManager");
 
             for (int i = 0; i < paths.Length; i++)
             {
@@ -60,7 +60,7 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         private static AssetData LoadAsset(Assembly assembly, string path)
         {
-            ExceptionUtils.ThrowIfArgumentNull(path, "path");
+            ThrowExceptionUtils.ArgumentNull(path, "path");
 
             string jsonPath = path.ReplaceExtensionPath("json");
             string serializedData = null;
@@ -232,8 +232,8 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         public static Texture2D LoadEmbeddedTexture(Assembly assembly, string path, TextureFormat format = TextureFormat.RGBA32)
         {
-            ExceptionUtils.ThrowIfArgumentNull(assembly, "assembly");
-            ExceptionUtils.ThrowIfArgumentNull(path, "path");
+            ThrowExceptionUtils.ArgumentNull(assembly, "assembly");
+            ThrowExceptionUtils.ArgumentNull(path, "path");
             
             Texture2D tex = null;
             using (Stream stream = assembly.GetManifestResourceStream(path))
@@ -247,8 +247,8 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         public static Sprite LoadEmbeddedSprite(Assembly assembly, string path, float pixelsPerUnit = 1f, Vector2? center = null)
         {
-            ExceptionUtils.ThrowIfArgumentNull(assembly, "assembly");
-            ExceptionUtils.ThrowIfArgumentNull(path, "path");
+            ThrowExceptionUtils.ArgumentNull(assembly, "assembly");
+            ThrowExceptionUtils.ArgumentNull(path, "path");
 
             if (center == null) center = Vector2.one / 2f;
             Vector2 _center = center.Value;
@@ -260,13 +260,13 @@ namespace BaldiPlusNineNineFramework.Utilities
 
         public static Texture2D LoadMyEmbeddedTexture(string name, TextureFormat format = TextureFormat.RGBA32)
         {
-            ExceptionUtils.ThrowIfArgumentNull(name, "name");
+            ThrowExceptionUtils.ArgumentNull(name, "name");
             return LoadEmbeddedTexture(Assembly.GetExecutingAssembly(), name, format);
         }
 
         public static Sprite LoadMyEmbeddedSprite(string name, float pixelsPerUnit = 1f, Vector2? center = null)
         {
-            ExceptionUtils.ThrowIfArgumentNull(name, "name");
+            ThrowExceptionUtils.ArgumentNull(name, "name");
             return LoadEmbeddedSprite(Assembly.GetExecutingAssembly(), name, pixelsPerUnit, center);
         }
 

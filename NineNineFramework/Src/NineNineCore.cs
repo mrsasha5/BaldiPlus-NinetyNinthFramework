@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.IO;
-using System.Reflection;
-using BaldiPlusNineNineFramework.Components.UI;
-using BaldiPlusNineNineFramework.Managers;
+using BaldiPlusNineNineFramework.Components;
+using BaldiPlusNineNineFramework.Debugging;
+using BaldiPlusNineNineFramework.Management;
 using BaldiPlusNineNineFramework.Utilities;
 using BepInEx;
 using HarmonyLib;
@@ -18,16 +16,26 @@ namespace BaldiPlusNineNineFramework
     [BepInPlugin(GUID, NAME, VERSION)]
     public class NineNineCore : BaseUnityPlugin
     {
+        // Framework information
         public const string GUID = "mrsasha5.baldiplus.ninetyninthframework";
         public const string NAME = "Ninety-Ninth Framework";
         public const string VERSION = "0.1.0.0";
-        private const string CACHE_FOLDER = "Cache";
 
-        internal static string CachePath { get; private set; } = Path.Combine(Application.persistentDataPath, GUID, CACHE_FOLDER);
-        internal static string AudioCachePath { get; set; } = Path.Combine(CachePath, "Audio");
+        private const string CORE_FOLDER = GUID;
+        // Caching
+        private const string CACHE_FOLDER = "Cache";
+        private const string UNPACKED_EMBEDDED_ASSETS_FOLDER = "UnpackedEmbeddedAssets";
+        // Data
+        private const string GLOBAL_DATA_FOLDER = "GlobalData";
+
+        internal static string CorePath { get; } = Path.Combine(Application.persistentDataPath, CORE_FOLDER);
+        internal static string GlobalDataPath { get; } = Path.Combine(CorePath, GLOBAL_DATA_FOLDER);
+        internal static string CachePath { get; } = Path.Combine(CorePath, CACHE_FOLDER);
+        internal static string AudioCachePath { get; } = Path.Combine(CachePath, UNPACKED_EMBEDDED_ASSETS_FOLDER, "Audio");
 
         internal static AssetManager VanillaAssets { get; private set; } = new AssetManager();
         internal static AssetManager Assets { get; private set; } = new AssetManager();
+
         internal static NineNineCore Instance { get; private set; }
         internal static bool CoreInitialized { get; private set; }
 
@@ -38,17 +46,20 @@ namespace BaldiPlusNineNineFramework
             harmony.PatchAllConditionals();
             ConfigManager.Initialize();
             LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(AssetLoader()), LoadingEventOrder.Start);
-            //LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(MainLoader()), LoadingEventOrder.Pre);
+            LoadingEvents.RegisterOnAssetsLoaded(Info, BaseLoader(MainLoader()), LoadingEventOrder.Pre);
 
             ContentFactory.InitializeMainPaths();
             ContentFactory.RegisterWelcomeButtons();
-            Registers.OnSingletonsInstantiated += ContentFactory.InitializeSingletons;
+#if DEBUG
+            gameObject.AddComponent<DebugMenu>();
+#endif
         }
 
         internal static void OnSceneUnload()
         {
             LayerUtils.Initialize();
             ContentFactory.InitializeAssets();
+            ContentFactory.InitializeSingletons();
             ContentFactory.InitializePrefabs();
             CoreInitialized = true;
         }
@@ -56,7 +67,8 @@ namespace BaldiPlusNineNineFramework
         private IEnumerator MainLoader()
         {
             yield return 1;
-            //yield return "";
+            yield return "Initializing achievements...";
+            ContentFactory.InitializeAchievements();
         }
 
         private IEnumerator AssetLoader()

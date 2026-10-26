@@ -1,5 +1,4 @@
 ﻿using BaldiPlusNineNineFramework.Extensions;
-using BaldiPlusNineNineFramework.Managers;
 using BaldiPlusNineNineFramework.Utilities;
 using MTM101BaldAPI;
 using MTM101BaldAPI.UI;
@@ -19,7 +18,6 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         internal Vector2 size;
 
-        // References to everything
         public WelcomeMenu screen;
         public Image mainImage;
         public Image maskImage;

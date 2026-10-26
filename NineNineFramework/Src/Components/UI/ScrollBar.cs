@@ -7,6 +7,15 @@ using UnityEngine.UI;
 
 namespace BaldiPlusNineNineFramework.Components.UI
 {
+    public enum ScrollBarType
+    {
+        Vertical,
+        Horizontal
+    }
+
+    /// <summary>
+    /// Provides everything you need for creating scroll bars with the support of Rewired Input library.
+    /// </summary>
     public class ScrollBar : MonoBehaviour, IStandardUIElement
     {
         [SerializeField]
@@ -20,6 +29,9 @@ namespace BaldiPlusNineNineFramework.Components.UI
 
         [SerializeField]
         private bool mouseWheelSupport, locked;
+
+        [SerializeField]
+        private ScrollBarType type;
 
         [SerializeField]
         private Transform targetTransform;
@@ -111,7 +123,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             }
         }
 
-        private void SetButtonPosition(float yValue, bool pushToEnd)
+        private void SetButtonPosition(float coordinate, bool pushToEnd)
         {
             // Calculate the allowed range of Y-axis
             float scrollButtonHalfLength = scrollButtonImage.rectTransform.sizeDelta.y / 2f;
@@ -121,7 +133,7 @@ namespace BaldiPlusNineNineFramework.Components.UI
             // Set new button position
             Vector3 oldButtonLocalPos = scrollButtonImage.rectTransform.localPosition;
             Vector3 newButtonGlobalPos = backgroundImage.rectTransform.position;
-            newButtonGlobalPos.y = yValue;
+            newButtonGlobalPos.y = coordinate;
             scrollButtonImage.rectTransform.position = newButtonGlobalPos;
 
             // Revert position
